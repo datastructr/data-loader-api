@@ -2,19 +2,20 @@ import os
 
 
 class BaseConfig(object):
-    APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
+    APP_DIR = os.path.abspath(os.path.dirname(__file__))
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
 
     ERROR_404_HELP = False
     SQLALCHEMY_DATABASE_URI = 'postgresql://'
-    SECRET_KEY = '1d94e52c-1c89-4515-b87a-f48cf3cb7f0b'
+    # Be sure to have a SECRET_KEY environment variable in production
+    SECRET_KEY = os.getenv('SECRET_KEY', '1d94e52c-1c89-4515-b87a-f48cf3cb7f0b')
 
 
 class ProductionConfig(BaseConfig):
     """Production configuration."""
     ENV = 'production'
     DEBUG = False
-    # DB URL variable set in env
+    # Be sure to have a DATABASE_URL variable set in production environment
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', '')
 
 
@@ -24,7 +25,9 @@ class DevelopmentConfig(BaseConfig):
     DEBUG = True
     DB_NAME = 'bids_02'
     DB_PATH = os.path.join(BaseConfig.PROJECT_ROOT, DB_NAME)
-    SQLALCHEMY_DATABASE_URI = 'postgresql://postgres@localhost/bids_02'
+    # Configure your env to have DATABASE_URL set locally or hard code it
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI', \
+        'postgresql://user:password@localhost/somedb')
 
 
 class TestingConfig(BaseConfig):
