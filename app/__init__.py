@@ -1,3 +1,7 @@
+"""
+@author: Jordan Taylor
+@github: jtaylor32
+"""
 import os
 
 from flask import Flask
