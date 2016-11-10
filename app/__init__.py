@@ -10,17 +10,19 @@ from app.extensions import (
 from app.api import api_blueprint
 
 
-if os.getenv("FLASK_ENV") == 'prod':
+if os.environ.get("FLASK_ENV") == 'production':
     DefaultConfig = ProductionConfig
 else:
     DefaultConfig = DevelopmentConfig
 
+
+# APPLICATION FACTORY =========================================================
 def create_app(config_object=DefaultConfig):
-    '''A flask application factory
+    """A flask application factory
 
     :param config_object: The configuration object to use.
     :returns: flask.Flask object
-    '''
+    """
     app = Flask(__name__)
     app.config.from_object(config_object)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -29,6 +31,7 @@ def create_app(config_object=DefaultConfig):
     return app
 
 
+# REGISTER EXTENSIONS =========================================================
 def register_extensions(app):
     """Call the method 'init_app' to register the extensions in the flask.Flask
     object passed as parameter.
@@ -41,6 +44,7 @@ def register_extensions(app):
     migrate.init_app(app, db)
 
 
+# REGISTER BLUEPRINTS =========================================================
 def register_blueprints(app):
     """Register all blueprints.
 

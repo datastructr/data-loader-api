@@ -1,13 +1,14 @@
 from sqlalchemy import *
 
-# TODO allow for postgis fields
+# TODO allow for postgis fields (Geometry is needed for current test database)
 from geoalchemy2 import Geometry
 
 from app.extensions import db
 from app.utils import abort_404
 
 
-def getColumns(table_name):
+# unused function right now
+def get_columns(table_name):
     columns = []
 
     metadata = MetaData()
@@ -31,7 +32,13 @@ def getColumns(table_name):
     return columns
 
 
-def getSingleTable(table_name):
+def get_single_table(table_name):
+    """get_single_table =>> function to retrieve and return a
+    single table's schema
+
+    :param table_name: The table_name string to use
+    :returns: dictionary response
+    """
     response = []
 
     metadata = MetaData()
@@ -64,8 +71,12 @@ def getSingleTable(table_name):
     return response
 
 
-# retrieve all the tables and columns/properties and return a dictionary of metadata
-def getTables():
+def get_tables():
+    """get_table =>> function to retrieve and return all of a
+    database's table-schema pairs
+
+    :returns: dictionary response
+    """
     tables = []
 
     metadata = MetaData()
@@ -96,16 +107,23 @@ def getTables():
 
     return tables
 
-# TODO insert data into a table based on json object being passed through
-def postTables(data):
-    table = data['table']
 
-    columns = getColumns(table)
+def post_table(json):
+    """get_single_table function
 
-    for column, value in data['data']:
-        print('column...  \n', column)
-        print('     value...  \n', value)
+    :param json: The JSON Object sent to a POST endpoint
+    :returns: dictionary response
+    """
+    rows = []
 
-    # with engine.begin() as connection:
-    #     r1 = connection.execute('INSERT INTO ' + data.table.table_name + ' VALUES (' )
-    #     connection.execute(table1.insert(), col1=7, col2='this is some data')
+    if json['data'] is null:
+        return abort_404()
+    else:
+        for column in json['data']:
+            for key in column:
+                rows.append({key: column[key]})
+
+        print(rows)
+
+    return {'message': 'You have successfully uploaded data to the >>' \
+                       + json['table'] + '<< table'}

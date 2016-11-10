@@ -1,41 +1,54 @@
+import json
 from flask_restful import Resource, request
 
 from app.api import api
 from app.api.controllers import schema
 
+# Import test JSON data
+from app.data import test_json
 
-# A single table schema
-# describes the schema for a single table the api is connected to
+
 class Schema(Resource):
+    """Schema Class is the Resource for a single table schema
+    in a database
+
+    :extends Resource
+    :returns: a JSON response
+    """
     def get(self, table_name):
-        response = schema.getSingleTable(table_name)
-        if response[0] == 404:
-            return 404
-        else:
-            return response
+        response = schema.get_single_table(table_name)
+        return response
 
 
-# Schema List
-# describes the schema that the api is connected to
 class SchemaList(Resource):
-    def get(self):
-        response = schema.getTables()
-        if response[0] == 404:
-            return 404
-        else:
-            return response
+    """SchemaList Class is the Resource for fetching all table schemas
+    in a database
 
-    # TODO in progress working on posting/parsing a json with specific fields to be uploaded to
-    #       a valid table in the schema connected to
+    :extends Resource
+    :returns: a JSON response
+    """
+    def get(self):
+        response = schema.get_tables()
+        return response
+
+
+class Upload(Resource):
+    """Upload Class is the Resource for uploading a data to a single table
+
+    :extends Resource
+    :returns: a JSON response
+    """
     def post(self):
         json_data = request.get_json(force=True)
 
-        try:
-            response = schema.postTables(json_data)
-        except ValueError:
-            return 'That was not a valid JSON Object to POST', 404
+        if 'table' in json_data and 'data' in json_data:
+            response = schema.post_table(test_json)
+        else:
+            return {'message': 'You must specify a table with data to upload'}
 
-        return 'Cheers! Data uploaded.', 201
+        return response
 
+# Add resource endpoints here =================================================
 api.add_resource(Schema, '/schema/<table_name>')
 api.add_resource(SchemaList, '/schema')
+api.add_resource(Upload, '/upload')

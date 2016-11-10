@@ -8,7 +8,8 @@ class BaseConfig(object):
     ERROR_404_HELP = False
     SQLALCHEMY_DATABASE_URI = 'postgresql://'
     # Be sure to have a SECRET_KEY environment variable in production
-    SECRET_KEY = os.getenv('SECRET_KEY', '1d94e52c-1c89-4515-b87a-f48cf3cb7f0b')
+    SECRET_KEY = os.getenv('SECRET_KEY', \
+       '1d94e52c-1c89-4515-b87a-f48cf3cb7f0b')
 
 
 class ProductionConfig(BaseConfig):
@@ -26,7 +27,7 @@ class DevelopmentConfig(BaseConfig):
     DB_NAME = 'bids_02'
     DB_PATH = os.path.join(BaseConfig.PROJECT_ROOT, DB_NAME)
     # Configure your env to have DATABASE_URL set locally or hard code it
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URI', \
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', \
         'postgresql://user:password@localhost/somedb')
 
 

@@ -1,8 +1,6 @@
 *.py[co]
 *.DS_*
 # Packages
-*.egg
-*.egg-info
 dist
 build
 eggs
@@ -31,5 +29,5 @@ app/utils.py
 .idea
 .env
 env
-*.pyc
-build
+template.json
+app/data.py
