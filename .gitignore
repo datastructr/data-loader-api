@@ -25,7 +25,6 @@ pip-log.txt
 *.mo
 
 # Dev
-app/utils.py
 .idea
 .env
 env

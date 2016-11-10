@@ -1,11 +1,14 @@
-import json
 from flask_restful import Resource, request
 
 from app.api import api
 from app.api.controllers import schema
+from app.utils import abort_bad_upload_json
 
 # Import test JSON data
-from app.data import test_json
+from app.data import (
+    test_table_json,
+    test_multiple_json,
+)
 
 
 class Schema(Resource):
@@ -41,10 +44,17 @@ class Upload(Resource):
     def post(self):
         json_data = request.get_json(force=True)
 
-        if 'table' in json_data and 'data' in json_data:
-            response = schema.post_table(test_json)
+        if 'multiple' in json_data:
+            for table in test_multiple_json['multiple']:
+                if 'table' in table and 'data' in table:
+                    response = schema.post_table(table)
+                else:
+                    return abort_bad_upload_json()
         else:
-            return {'message': 'You must specify a table with data to upload'}
+            if 'table' in json_data and 'data' in json_data:
+                response = schema.post_table(test_table_json)
+            else:
+                return abort_bad_upload_json()
 
         return response
 

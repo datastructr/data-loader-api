@@ -4,32 +4,56 @@ from sqlalchemy import *
 from geoalchemy2 import Geometry
 
 from app.extensions import db
-from app.utils import abort_404
+from app.utils import (
+    abort_bad_endpoint,
+    abort_bad_upload_json,
+    abort_column_not_found,
+    abort_table_not_found,
+)
 
 
-# unused function right now
-def get_columns(table_name):
+def check_table(table_json):
+    """check_table =>> function that checks whether or not the specified table
+    and the columns in that data are valid
+
+    :param table_json: the full table JSON sent through the endpoint
+    :return: Boolean
+    """
+    table_name = table_json['table']
+    data = table_json['data']
+
     columns = []
+
+    for row in data:
+        for key in row:
+            if key in columns:
+                break
+            else:
+                columns.append(key)
 
     metadata = MetaData()
 
     metadata.reflect(bind=db.engine)
 
+    check_columns = []
+
     try:
         table = metadata.tables[table_name]
 
         for column in table.columns:
-            columns.append({
-                'primary_key': column.primary_key,
-                'column_name': str(column.name),
-                'type': str(column.type),
-                'nullable': str(column.nullable),
-            })
-
+            check_columns.append(str(column.name))
     except LookupError:
-        return abort_404()
+        return abort_table_not_found(table_name)
 
-    return columns
+    for item in columns:
+        if item not in check_columns:
+            return abort_column_not_found(item, table_name)
+
+    return True
+
+
+def insert_data(data_json):
+    return {'message': 'hello in insert_data'}
 
 
 def get_single_table(table_name):
@@ -51,11 +75,17 @@ def get_single_table(table_name):
         properties = []
 
         for column in table.columns:
+            foreign_keys = []
+
+            for key in column.foreign_keys:
+                foreign_keys.append(key.target_fullname)
+
             properties.append({
+                'foreign_keys': foreign_keys,
                 'primary_key': column.primary_key,
                 'nullable': str(column.nullable),
                 'type': str(column.type),
-                'column_name': str(column.name)
+                'column': str(column.name)
             })
 
         response.append({
@@ -66,7 +96,7 @@ def get_single_table(table_name):
         })
 
     except KeyError:
-        return abort_404()
+        return abort_bad_endpoint()
 
     return response
 
@@ -88,7 +118,13 @@ def get_tables():
             properties = []
 
             for column in table.columns:
+                foreign_keys = []
+
+                for key in column.foreign_keys:
+                    foreign_keys.append(key.target_fullname)
+
                 properties.append({
+                    'foreign_keys': foreign_keys,
                     'primary_key': column.primary_key,
                     'nullable': str(column.nullable),
                     'type': str(column.type),
@@ -103,13 +139,14 @@ def get_tables():
             })
 
     except ConnectionError:
-        return abort_404()
+        return abort_bad_endpoint()
 
     return tables
 
 
 def post_table(json):
-    """get_single_table function
+    """post_table =>> function to take a single json object and check -> insert
+    the data to a specific table
 
     :param json: The JSON Object sent to a POST endpoint
     :returns: dictionary response
@@ -117,13 +154,15 @@ def post_table(json):
     rows = []
 
     if json['data'] is null:
-        return abort_404()
+        return abort_bad_upload_json()
     else:
-        for column in json['data']:
-            for key in column:
-                rows.append({key: column[key]})
+        for row in json['data']:
+            rows.append(row)
 
-        print(rows)
+        check = check_table(json)
 
-    return {'message': 'You have successfully uploaded data to the >>' \
-                       + json['table'] + '<< table'}
+        if check is True:
+            # print(rows)
+            return insert_data(rows)
+        else:
+            return check
