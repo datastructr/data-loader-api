@@ -1,5 +1,4 @@
 from sqlalchemy import *
-from sqlalchemy import text
 
 # TODO allow for postgis fields (Geometry is needed for current test database)
 from geoalchemy2 import Geometry
