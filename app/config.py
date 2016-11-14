@@ -26,8 +26,6 @@ class DevelopmentConfig(BaseConfig):
     """Development configuration."""
     ENV = 'development'
     DEBUG = True
-    DB_NAME = 'bids_02'
-    DB_PATH = os.path.join(BaseConfig.PROJECT_ROOT, DB_NAME)
     # Configure your env to have DATABASE_URL set locally or hard code it
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DATABASE_URL',

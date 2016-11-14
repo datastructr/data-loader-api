@@ -1,14 +1,9 @@
 from sqlalchemy import *
+from sqlalchemy.exc import SQLAlchemyError
 
 # TODO allow for postgis fields (Geometry is needed for current test database)
-from geoalchemy2 import Geometry
 
 from app.extensions import db
-from app.utils import (
-    abort_bad_upload_json,
-    abort_column_not_found,
-    abort_table_not_found,
-)
 
 
 def check_data_columns(column_list, data_row):
@@ -110,11 +105,11 @@ def check_table(table_name, data_json):
         for column in table.columns:
             check_columns.append(str(column.name))
     except LookupError:
-        return 'Table >' + table_name + '< was not found'
+        return 'table: >>' + table_name + '<< was not found'
 
     for item in columns:
         if item not in check_columns:
-            return 'Column >' + str(item) + '< was not found in >' + table_name + '<.'
+            return 'column: >>' + str(item) + '<< was not found in table: >>' + table_name + '<<.'
 
     return True
 
@@ -218,15 +213,15 @@ def insert_data(table_name, data_json):
         enable_fk_constraints = text('ALTER TABLE %s ENABLE TRIGGER USER' % table_name)
         connection.execute(enable_fk_constraints)
 
-    except:
+    except SQLAlchemyError as e:
         transaction.rollback()
 
         enable_fk_constraints = text('ALTER TABLE %s ENABLE TRIGGER USER' % table_name)
         connection.execute(enable_fk_constraints)
 
-        raise
+        return {'insert_error': e}
 
-    return 'Successful insert of data into ' + table_name
+    return 'successful insert of data into >>' + table_name + '<<'
 
 
 def post_table(json):
@@ -247,7 +242,10 @@ def post_table(json):
         check = check_table(json['table'], json['data'])
 
         if check is True:
-            result = insert_data(json['table'], rows)
-            return {'created': result}
+            result = str(insert_data(json['table'], rows))
+            if 'Successful' in result:
+                return {'created': result}
+            else:
+                return {'error': result}
         else:
             return {'error': check}
