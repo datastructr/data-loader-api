@@ -11,15 +11,83 @@ from app.utils import (
 )
 
 
-def check_table(table_json):
+def check_data_columns(column_list, data_row):
+    """check_data_columns =>> function to take a list of columns that are being
+    inserted into (from the data_json) and make sure there are parameters for
+    the abstracted insert statement
+
+    :param column_list: list of columns name
+    :param data_row: dictionary for a specific ingest row
+    :return: dictionary for ingestion
+    """
+    for item in column_list:
+        if item not in data_row:
+            column_name = item
+            data_row[column_name] = None
+
+    return data_row
+
+
+def get_data_columns(data_json):
+    """get_data_columns =>> generic get 'column' names (keys) from a dictionary
+
+    :param data_json: dictionary of data
+    :return: list of column names
+    """
+    columns = []
+
+    for row in data_json:
+        for key in row:
+            if key in columns:
+                break
+            else:
+                columns.append(key)
+
+    return columns
+
+
+def create_abstract_insert(table_name, data_json):
+    """create_abstract_insert =>> function to create an abstracted raw insert
+    psql statement for inserting a single row of data
+
+    :param table_name: String of a table_name
+    :param data_json: dictionary of ingestion data
+    :return: String of an insert statement
+    """
+    table_name = table_name
+    data = data_json
+
+    columns = []
+
+    for row in data:
+        for key in row:
+            if key in columns:
+                break
+            else:
+                columns.append(key)
+
+    values = [':' + item for item in columns]
+
+    values = ', '.join(map(str, values))
+
+    list_columns = ', '.join(map(str, columns))
+
+    statement = 'INSERT INTO ' + str(table_name) + '(' + list_columns + ')' \
+        + 'VALUES (' + values + ')'
+
+    return statement
+
+
+def check_table(table_name, data_json):
     """check_table =>> function that checks whether or not the specified table
     and the columns in that data are valid
 
-    :param table_json: the full table JSON sent through the endpoint
+    :param table_name: String of the table's name
+    :param data_json: the full data ingestion JSON sent through the endpoint
     :return: Boolean
     """
-    table_name = table_json['table']
-    data = table_json['data']
+    table_name = table_name
+    data = data_json
 
     columns = []
 
@@ -51,6 +119,8 @@ def check_table(table_json):
     return True
 
 
+# =============================================================================
+# Deprecated ==================================================================
 # TODO : refactor this and create_values to be one function to reduce time
 #   complexity
 def create_insert(row):
@@ -106,6 +176,8 @@ def insert_row(statement):
         raise
 
     return result
+# End Deprecated ==============================================================
+# =============================================================================
 
 
 def insert_data(table_name, data_json):
@@ -117,27 +189,32 @@ def insert_data(table_name, data_json):
     :return: json response with proper error/success detection
     """
 
-    inserts = []
+    results = []
 
-    for row in data_json:
-        # start sql statement
-        stmt = 'INSERT INTO ' + table_name + ' ('
+    columns = get_data_columns(data_json)
 
-        insert_into_stmt = create_insert(row)
+    connection = db.engine.connect()
 
-        values = create_values(row)
+    transaction = connection.begin()
 
-        sql = text(stmt + insert_into_stmt + values)
+    try:
+        statement = create_abstract_insert(table_name, data_json)
 
-        inserts.append(sql)
+        insert_sql = text(statement)
 
-    for i in inserts:
-        try:
-            insert_row(i)
-        except:
-            raise
+        for row in data_json:
+            new_row = check_data_columns(columns, row)
+            result = connection.execute(insert_sql, **new_row)
+            results.append(result)
 
-    return {'message': 'Successful insert of data into ' + table_name}
+        transaction.commit()
+    except:
+        transaction.rollback()
+        raise
+
+    return {
+        'message': 'Successful insert of data into ' + table_name,
+    }
 
 
 def post_table(json):
@@ -155,10 +232,9 @@ def post_table(json):
         for row in json['data']:
             rows.append(row)
 
-        check = check_table(json)
+        check = check_table(json['table'], json['data'])
 
         if check is True:
-            # print(rows)
             return insert_data(json['table'], rows)
         else:
             return check

@@ -43,8 +43,8 @@ def get_single_table(table_name):
 
         response.append({
             'table': {
-                'properties': properties,
-                'name': table.name
+                'table_properties': properties,
+                'table_name': table.name
             }
         })
 
@@ -86,8 +86,8 @@ def get_tables():
 
             tables.append({
                 'table' : {
-                    'properties': properties,
-                    'name': table.name
+                    'table_properties': properties,
+                    'table_name': table.name
                 }
             })
 

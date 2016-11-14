@@ -4,7 +4,9 @@ The main purpose for the _data-loader-api_ is to allow for a dynamic frontend cl
 
 The upload process will have capabilities to read and write to any schema that the API is configured with.  
 
-Based on shear fact that data ingestion, at it's core is a pain - we are out to solve a complex problem with a simple solution. The backend RESTful API will make for a fast and efficient way for client applications to send and recieve data from multiple endpoints.
+Based on shear fact that data ingestion, at it's core is a pain - we are out to solve a complex problem with a simple solution. The backend RESTful API will make for a fast and efficient way for client applications to send and receive data from multiple endpoints.
+
+The backend upload process will ingestion data using **transactions** -- this is key in keeping data sets consistent with the potential ingestion data.  Once the data set is then cleaned for ingestion it will be process and ingested the proper way.
 
 ## Configurations
 

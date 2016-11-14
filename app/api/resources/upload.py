@@ -5,7 +5,8 @@ from app.api.controllers import upload
 from app.utils import abort_bad_upload_json
 
 # Import test JSON data
-from app.data import (
+#       Create data module under /api module and create some test data
+from app.data.bulk_upload import (
     test_table_json,
     test_multiple_json,
 )
