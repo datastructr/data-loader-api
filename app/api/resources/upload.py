@@ -23,14 +23,14 @@ class Upload(Resource):
 
         response = []
         if 'multiple' in json_data:
-            for table in test_multiple_json['multiple']:
+            for table in json_data['multiple']:
                 if 'table' in table and 'data' in table:
                     response.append(upload.post_table(table))
                 else:
                     return abort_bad_upload_json()
         else:
             if 'table' in json_data and 'data' in json_data:
-                response = upload.post_table(test_table_json)
+                response = upload.post_table(json_data)
             else:
                 return abort_bad_upload_json()
 
