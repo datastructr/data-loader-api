@@ -4,10 +4,6 @@ from sqlalchemy import *
 from geoalchemy2 import Geometry
 
 from app.extensions import db
-from app.utils import (
-    abort_bad_endpoint,
-)
-
 
 def get_single_table(table_name):
     """get_single_table =>> function to retrieve and return a
@@ -49,9 +45,9 @@ def get_single_table(table_name):
         })
 
     except KeyError:
-        return abort_bad_endpoint()
+        return {'error': KeyError}
 
-    return response
+    return {'success': response}
 
 
 def get_tables():
@@ -92,6 +88,6 @@ def get_tables():
             })
 
     except ConnectionError:
-        return abort_bad_endpoint()
+        return {'error': 'Database connection error check configurations'}
 
-    return tables
+    return {'success': tables}

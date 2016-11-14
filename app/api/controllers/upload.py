@@ -110,11 +110,11 @@ def check_table(table_name, data_json):
         for column in table.columns:
             check_columns.append(str(column.name))
     except LookupError:
-        return abort_table_not_found(table_name)
+        return 'Table >' + table_name + '< was not found'
 
     for item in columns:
         if item not in check_columns:
-            return abort_column_not_found(item, table_name)
+            return 'Column >' + str(item) + '< was not found in >' + table_name + '<.'
 
     return True
 
@@ -198,6 +198,11 @@ def insert_data(table_name, data_json):
     transaction = connection.begin()
 
     try:
+
+        disable_fk_constraints = text('ALTER TABLE %s DISABLE TRIGGER USER' % table_name)
+
+        connection.execute(disable_fk_constraints)
+
         statement = create_abstract_insert(table_name, data_json)
 
         insert_sql = text(statement)
@@ -207,14 +212,21 @@ def insert_data(table_name, data_json):
             result = connection.execute(insert_sql, **new_row)
             results.append(result)
 
+
         transaction.commit()
+
+        enable_fk_constraints = text('ALTER TABLE %s ENABLE TRIGGER USER' % table_name)
+        connection.execute(enable_fk_constraints)
+
     except:
         transaction.rollback()
+
+        enable_fk_constraints = text('ALTER TABLE %s ENABLE TRIGGER USER' % table_name)
+        connection.execute(enable_fk_constraints)
+
         raise
 
-    return {
-        'message': 'Successful insert of data into ' + table_name,
-    }
+    return 'Successful insert of data into ' + table_name
 
 
 def post_table(json):
@@ -227,7 +239,7 @@ def post_table(json):
     rows = []
 
     if json['data'] is null:
-        return abort_bad_upload_json()
+        return {'error': 'You must specify a table with data to upload'}
     else:
         for row in json['data']:
             rows.append(row)
@@ -235,6 +247,7 @@ def post_table(json):
         check = check_table(json['table'], json['data'])
 
         if check is True:
-            return insert_data(json['table'], rows)
+            result = insert_data(json['table'], rows)
+            return {'created': result}
         else:
-            return check
+            return {'error': check}

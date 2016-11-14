@@ -2,6 +2,7 @@ from flask_restful import Resource
 
 from app.api import api
 from app.api.controllers import schema
+from app.helpers import api_response
 
 
 class Schema(Resource):
@@ -11,6 +12,8 @@ class Schema(Resource):
     :extends Resource
     :returns: a JSON response
     """
+
+    @api_response
     def get(self, table_name):
         response = schema.get_single_table(table_name)
         return response
@@ -23,6 +26,8 @@ class SchemaList(Resource):
     :extends Resource
     :returns: a JSON response
     """
+
+    @api_response
     def get(self):
         response = schema.get_tables()
         return response

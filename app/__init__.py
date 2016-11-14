@@ -6,7 +6,10 @@ import os
 
 from flask import Flask
 
-from app.config import ProductionConfig, DevelopmentConfig
+from app.config import (
+    ProductionConfig,
+    DevelopmentConfig,
+)
 from app.extensions import (
     db,
     migrate,
