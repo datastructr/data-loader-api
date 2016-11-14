@@ -22,7 +22,5 @@ The backend upload process will ingestion data using **transactions** -- this is
 
 ## Future Iteration Features
 
-- [ ] Securing and validating the ingestion data
-- [ ] Inserting the full respected data "post" check constraints/validation
 - [ ] Allowing for multiple database connections
 - [ ] JSON Web Token authentication (right now we are leaving client-side developers handle authentication)
