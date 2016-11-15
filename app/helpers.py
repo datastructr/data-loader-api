@@ -5,11 +5,11 @@ from flask import jsonify
 
 
 def api_response(function):
-    """ api_response =>> decorator function that creates a standard response
+    """api_response =>> decorator function that creates a standard response
 
     :function: The dictionary returned will have a key-value pair from below
         success -> GET, 200
-        error -> Bad Request, 400
+        error   -> Bad Request, 400
         created -> POST, 201
         updated -> PUT, 200
         deleted -> DELETE, 200

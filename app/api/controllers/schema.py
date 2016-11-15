@@ -5,6 +5,7 @@ from geoalchemy2 import Geometry
 
 from app.extensions import db
 
+
 def get_single_table(table_name):
     """get_single_table =>> function to retrieve and return a
     single table's schema
@@ -64,6 +65,7 @@ def get_tables():
         metadata.reflect(bind=db.engine)
 
         for table in metadata.sorted_tables:
+
             properties = []
 
             for column in table.columns:
@@ -81,7 +83,7 @@ def get_tables():
                 })
 
             tables.append({
-                'table' : {
+                'table': {
                     'table_properties': properties,
                     'table_name': table.name
                 }

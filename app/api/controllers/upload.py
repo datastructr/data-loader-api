@@ -4,6 +4,10 @@ from sqlalchemy.exc import SQLAlchemyError
 # TODO allow for postgis fields (Geometry is needed for current test database)
 
 from app.extensions import db
+from app.mapping_configuration import mapping
+
+
+
 
 
 def check_data_columns(column_list, data_row):
@@ -243,7 +247,7 @@ def post_table(json):
 
         if check is True:
             result = str(insert_data(json['table'], rows))
-            if 'Successful' in result:
+            if 'successful' in result:
                 return {'created': result}
             else:
                 return {'error': result}

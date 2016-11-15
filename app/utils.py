@@ -22,3 +22,32 @@ def abort_column_not_found(column_name, table_name):
 
 def abort_database_insert_error(row):
     abort(400, message='Insert error: failed at statement -->' + row)
+
+
+# This function was written might be used for later date
+#   Moved to utils for now
+def get_sequence_names():
+    """get_sequence_name =>> function that will return all of the columns that
+    are associated with sequences so they will be sanity checked and will not
+    allow for insertion
+
+    :return: list of sequences associated with column_names
+    """
+    results = []
+
+    sequences_info_sql = text('SELECT * FROM information_schema.sequences;')
+
+    connection = db.engine.connect()
+
+    try:
+
+        db_output = connection.execute(sequences_info_sql)
+
+        for row in db_output:
+            results.append(row)
+
+    except SQLAlchemyError as e:
+
+        return {'selection_error': e}
+
+    return results
