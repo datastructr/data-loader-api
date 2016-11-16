@@ -40,7 +40,6 @@ def api_response(function):
     def make_response(*args, **kwargs):
 
         result = function(*args, **kwargs)
-        print(result)
 
         if not set(available_result_keys) & set(result):
             raise ValueError('Invalid result key.')

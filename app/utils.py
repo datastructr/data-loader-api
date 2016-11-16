@@ -51,3 +51,8 @@ def get_sequence_names():
         return {'selection_error': e}
 
     return results
+
+
+# function to validate all the items in a list are equal
+def validate_all_list_items(list):
+    return all(x == list[0] for x in list)

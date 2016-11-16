@@ -4,10 +4,6 @@ from sqlalchemy.exc import SQLAlchemyError
 # TODO allow for postgis fields (Geometry is needed for current test database)
 
 from app.extensions import db
-from app.mapping_configuration import mapping
-
-
-
 
 
 def check_data_columns(column_list, data_row):
@@ -116,67 +112,6 @@ def check_table(table_name, data_json):
             return 'column: >>' + str(item) + '<< was not found in table: >>' + table_name + '<<.'
 
     return True
-
-
-# =============================================================================
-# Deprecated ==================================================================
-# TODO : refactor this and create_values to be one function to reduce time
-#   complexity
-def create_insert(row):
-    """create_insert =>> function to add the columns to an import statement
-
-    :param row: dictionary -> of column data
-    :return: String
-    """
-    statement = ''
-    length = len(row)
-    index = 0
-    for item in row:
-        if index == length - 1:
-            statement += str(item) + ')'
-        else:
-            index += 1
-            statement += str(item) + ', '
-
-    return statement
-
-
-# TODO : refactor this and create_insert to be one function to reduce time
-#   complexity
-def create_values(row):
-    """create_values =>> function to add the values to an import statement
-
-    :param row: dictionary -> of column data
-    :return: String
-    """
-    statement = ' VALUES ('
-    length = len(row)
-    index = 0
-    for item in row:
-        if index == length - 1:
-            statement += '\'' + str(row.get(item)) + '\')'
-        else:
-            index += 1
-            statement += '\'' + str(row.get(item)) + '\', '
-
-    return statement
-
-
-def insert_row(statement):
-    """insert_row =>> function to insert a row of data into the database
-
-    :param statement: String -> insert statement for a specific row
-    :return: response database raised error or successful result
-    """
-    try:
-        result = db.engine.execute(statement)
-    except:
-        # return abort_database_insert_error(statement)
-        raise
-
-    return result
-# End Deprecated ==============================================================
-# =============================================================================
 
 
 def insert_data(table_name, data_json):
