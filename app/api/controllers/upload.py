@@ -1,9 +1,45 @@
-from sqlalchemy import *
+import sqlalchemy
 from sqlalchemy.exc import SQLAlchemyError
 
 # TODO allow for postgis fields (Geometry is needed for current test database)
 
 from app.extensions import db
+from app.table_mappings import mapping
+
+
+def validate_junction_data(table_name, data_json):
+    """validate_junction_data =>> function to take the data JSON and determine
+    whether or not it's a valid ingestion set (must pass required fields)
+
+    :param table_name: String of a table's name
+    :param data_json: dictionary of all the ingestion data for a table
+    :return: BOOLEAN
+    """
+
+    # no need to validate the 'required' key it's already there
+    required_fields = mapping[table_name]['required']
+    not_required_fields = mapping[table_name]['not_required']
+
+    row_count = 0
+    column_count = 0
+
+    for row in data_json:
+        for key, value in row.items():
+            if key in required_fields:
+                if value is None or value == '':
+                    return 'The value in row: ' + str(row_count) +  \
+                                 ' column: ' + str(column_count) + ' must be valid.'
+            elif key in not_required_fields:
+                if value is None or value == '':
+                    return 'The value in row: ' + str(row_count) + \
+                                 ' column: ' + str(column_count) + ' must be valid.'
+
+            column_count += 1
+
+        column_count = 0
+        row_count += 1
+
+    return True
 
 
 def check_data_columns(column_list, data_row):
@@ -85,15 +121,29 @@ def check_table(table_name, data_json):
     data = data_json
 
     columns = []
+    junction_columns = []
+
+    # if the table has junction hooks on it disregard the junction columns
+    if 'required' in mapping[table_name]:
+        if mapping[table_name]['required'] is not None:
+            for element in mapping[table_name]['required']:
+                junction_columns.append(element)
+
+    if 'not_required' in mapping[table_name]:
+        if mapping[table_name]['not_required'] is not None:
+            for element in mapping[table_name]['not_required']:
+                junction_columns.append(element)
+
+    print(junction_columns)
 
     for row in data:
         for key in row:
             if key in columns:
-                break
+                continue
             else:
                 columns.append(key)
 
-    metadata = MetaData()
+    metadata = sqlalchemy.MetaData()
 
     metadata.reflect(bind=db.engine)
 
@@ -108,8 +158,13 @@ def check_table(table_name, data_json):
         return 'table: >>' + table_name + '<< was not found'
 
     for item in columns:
-        if item not in check_columns:
-            return 'column: >>' + str(item) + '<< was not found in table: >>' + table_name + '<<.'
+        # if there are junction hooks check disregard columns for junctions
+        if len(junction_columns) > 0:
+            if item not in check_columns and item not in junction_columns:
+                return 'column: >>' + str(item) + '<< was not found in table: >>' + table_name + '<<.'
+        else:
+            if item not in check_columns:
+                return 'column: >>' + str(item) + '<< was not found in table: >>' + table_name + '<<.'
 
     return True
 
@@ -123,42 +178,51 @@ def insert_data(table_name, data_json):
     :return: json response with proper error/success detection
     """
 
-    results = []
+    if table_name in mapping:
+        check_junction_data = validate_junction_data(table_name, data_json)
 
-    columns = get_data_columns(data_json)
+        if check_junction_data is True:
+            # keep going with the upload
+            print('I am inserting table data that has a hook for junction inserts')
+        else:
+            return check_junction_data
+    else:
+        print('I am not inserting table data that has a hook for junction inserts')
+        results = []
 
-    connection = db.engine.connect()
+        columns = get_data_columns(data_json)
 
-    transaction = connection.begin()
+        connection = db.engine.connect()
 
-    try:
+        transaction = connection.begin()
 
-        disable_fk_constraints = text('ALTER TABLE %s DISABLE TRIGGER USER' % table_name)
+        try:
 
-        connection.execute(disable_fk_constraints)
+            disable_fk_constraints = sqlalchemy.text('ALTER TABLE %s DISABLE TRIGGER USER' % table_name)
 
-        statement = create_abstract_insert(table_name, data_json)
+            connection.execute(disable_fk_constraints)
 
-        insert_sql = text(statement)
+            statement = create_abstract_insert(table_name, data_json)
 
-        for row in data_json:
-            new_row = check_data_columns(columns, row)
-            result = connection.execute(insert_sql, **new_row)
-            results.append(result)
+            insert_sql = sqlalchemy.text(statement)
 
+            for row in data_json:
+                new_row = check_data_columns(columns, row)
+                result = connection.execute(insert_sql, **new_row)
+                results.append(result)
 
-        transaction.commit()
+            transaction.commit()
 
-        enable_fk_constraints = text('ALTER TABLE %s ENABLE TRIGGER USER' % table_name)
-        connection.execute(enable_fk_constraints)
+            enable_fk_constraints = sqlalchemy.text('ALTER TABLE %s ENABLE TRIGGER USER' % table_name)
+            connection.execute(enable_fk_constraints)
 
-    except SQLAlchemyError as e:
-        transaction.rollback()
+        except SQLAlchemyError as e:
+            transaction.rollback()
 
-        enable_fk_constraints = text('ALTER TABLE %s ENABLE TRIGGER USER' % table_name)
-        connection.execute(enable_fk_constraints)
+            enable_fk_constraints = sqlalchemy.text('ALTER TABLE %s ENABLE TRIGGER USER' % table_name)
+            connection.execute(enable_fk_constraints)
 
-        return {'insert_error': e}
+            return {'insert_error': e}
 
     return 'successful insert of data into >>' + table_name + '<<'
 
@@ -172,19 +236,24 @@ def post_table(json):
     """
     rows = []
 
-    if json['data'] is null:
-        return {'error': 'You must specify a table with data to upload'}
-    else:
-        for row in json['data']:
-            rows.append(row)
+    if 'table' in json:
+        if json['table'] is None or json['table'] == '':
+            return {'error': 'You must specify a table with data to upload'}
 
-        check = check_table(json['table'], json['data'])
-
-        if check is True:
-            result = str(insert_data(json['table'], rows))
-            if 'successful' in result:
-                return {'created': result}
-            else:
-                return {'error': result}
+    if 'data' in json:
+        if json['data'] is None or json['data'] == '':
+            return {'error': 'You must enter data allocated with your table'}
         else:
-            return {'error': check}
+            for row in json['data']:
+                rows.append(row)
+
+            check = check_table(json['table'], json['data'])
+
+            if check is True:
+                result = str(insert_data(json['table'], rows))
+                if 'successful' in result:
+                    return {'created': result}
+                else:
+                    return {'error': result}
+            else:
+                return {'error': check}

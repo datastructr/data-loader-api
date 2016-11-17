@@ -131,14 +131,14 @@ mapping = {
             },
         },
         'required': [
-            'sector_name',
+            'sector',
             'country_name',
         ],
         'not_required': [
-            'optional_field'
+            'test_name'
         ],
         'selectors': {
-            'sector_name': 'lead_sectors',
+            'sector': 'lead_sectors',
             'country_name': 'lead_countries',
             'test_name': 'lead_tests',
         }
