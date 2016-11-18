@@ -7,6 +7,133 @@ from app.extensions import db
 from app.table_mappings import mapping
 
 
+def create_abstract_junction_insert(table_name, junction_table_name):
+    """create_abstract_junction_insert =>> function to create an abstracted
+    parameters based insertion into a junction table
+
+    :param table_name: String table name hooked with a junction insert
+    :param junction_table_name: String junction table's name
+    :return: String of an insert statement
+    """
+    columns = []
+
+    if 'junction_tables' in mapping[table_name]:
+        if junction_table_name in mapping[table_name]['junction_tables']:
+            if 'columns' in mapping[table_name]['junction_tables'][junction_table_name]:
+                for column, value in mapping[table_name]['junction_tables'][junction_table_name]['columns'].items():
+                    columns.append(column)
+            else:
+                return {
+                    'error': 'Upload failed columns are required in mapping'
+                             ' configuration'
+                }
+        else:
+            return {
+                'error': 'Upload failed due to missing junction table: '
+                         + junction_table_name
+            }
+    else:
+        return {
+            'error': 'Upload failed due to missing junction'
+                     ' tables mapping configurations.'
+        }
+
+    values = [':' + item for item in columns]
+
+    values = ', '.join(map(str, values))
+
+    list_columns = ', '.join(map(str, columns))
+
+    statement = 'INSERT INTO ' + str(junction_table_name) + '(' + \
+                list_columns + ')' + 'VALUES (' + values + ')'
+
+    return statement
+
+
+def get_junctions_foreign_key(table_name, column_name, column_value):
+    """get_junctions_foreign_key =>> function that will select from a table in
+    the database to get a primary key to insert into the junction table
+
+    :param table_name: String table name hooked with a junction insert
+    :param column_name: String column name where clause will have
+    :param column_value: Unique value in the table so you can get a primary key
+        for junction insertions
+    :return: dictionary response
+    """
+    key_selectors = 'selectors' in mapping[table_name]
+    key_junctions = 'junction_tables' in mapping[table_name]
+
+    if key_selectors and key_junctions:
+
+        if column_name in mapping[table_name]['selectors']:
+
+            junction_table = mapping[table_name]['selectors'][column_name]
+
+            if any(junction_table in table
+                   for table in mapping[table_name]['junction_tables']):
+
+                table_cond = 'mapped_table' in mapping[table_name]['junction_tables'][junction_table]
+                field_cond = 'mapped_field' in mapping[table_name]['junction_tables'][junction_table]
+
+                if table_cond and field_cond:
+
+                    select_table = mapping[table_name]['junction_tables'][junction_table]['mapped_table']
+                    select_field = mapping[table_name]['junction_tables'][junction_table]['mapped_field']
+
+                    select_table_check = select_table is None
+                    select_field_check = select_field is None
+
+                    if select_table_check or select_field_check:
+                        return {
+                            'error': 'You must have values for mapped keys'
+                        }
+
+                    value = None
+
+                    select_stmt = sqlalchemy.text(
+                                    'SELECT ' + select_field +
+                                    ' FROM ' + select_table +
+                                    ' WHERE ' + column_name +
+                                    ' = \'' + column_value + '\''
+                                )
+
+                    try:
+                        result = db.engine.execute(select_stmt)
+                        for row in result:
+                            value = row[select_field]
+                    except SQLAlchemyError as e:
+                        return {
+                            'selection_error': e
+                        }
+
+                    return {
+                        'junction_table': junction_table,
+                        'value': value,
+                    }
+
+                else:
+                    return {
+                        'error': 'Invalid mapping configuration. Missing '
+                        + ' mapped configurations.'
+                    }
+            else:
+                return {
+                    'error': 'Invalid mapping configuration. Missing '
+                    + 'junction table: ' + str(junction_table)
+                }
+        else:
+            return {
+                'error': 'Invalid mapping configuration. Missing column name: '
+                + str(column_name)
+            }
+    else:
+        return {
+            'error': 'Invalid mapping configurations '
+                     'make sure you have selectors and junction_tables '
+                     'assigned to correct values'
+        }
+
+
 def validate_junction_data(table_name, data_json):
     """validate_junction_data =>> function to take the data JSON and determine
     whether or not it's a valid ingestion set (must pass required fields)
@@ -16,22 +143,27 @@ def validate_junction_data(table_name, data_json):
     :return: BOOLEAN
     """
 
-    # no need to validate the 'required' key it's already there
-    required_fields = mapping[table_name]['required']
-    not_required_fields = mapping[table_name]['not_required']
+    junction_fields = []
+
+    # get all of the junction fields to validate junction data
+    if 'required' in mapping[table_name]:
+        if mapping[table_name]['required'] is not None:
+            for element in mapping[table_name]['required']:
+                junction_fields.append(element)
+
+    if 'not_required' in mapping[table_name]:
+        if mapping[table_name]['not_required'] is not None:
+            for element in mapping[table_name]['not_required']:
+                junction_fields.append(element)
 
     row_count = 0
     column_count = 0
 
     for row in data_json:
         for key, value in row.items():
-            if key in required_fields:
+            if key in junction_fields:
                 if value is None or value == '':
                     return 'The value in row: ' + str(row_count) +  \
-                                 ' column: ' + str(column_count) + ' must be valid.'
-            elif key in not_required_fields:
-                if value is None or value == '':
-                    return 'The value in row: ' + str(row_count) + \
                                  ' column: ' + str(column_count) + ' must be valid.'
 
             column_count += 1
@@ -77,7 +209,22 @@ def get_data_columns(data_json):
     return columns
 
 
-def create_abstract_insert(table_name, data_json):
+def get_hooked_table_id(table_name, junction_table_name):
+    """get_hooked_table_id =>> function to return the mapped primary unique id
+    to "RETURN" it's value after insert
+
+    :param table_name: String table name hooked with a junction insert
+    :param junction_table_name: String junction table's name
+    :return: String of column name
+    """
+    if junction_table_name in mapping[table_name]['junction_tables']:
+        for column, value in \
+                mapping[table_name]['junction_tables'][junction_table_name]['columns'].items():
+            if table_name in value:
+                return value[table_name]
+
+
+def create_abstract_insert(table_name, data_json, return_field):
     """create_abstract_insert =>> function to create an abstracted raw insert
     psql statement for inserting a single row of data
 
@@ -103,8 +250,12 @@ def create_abstract_insert(table_name, data_json):
 
     list_columns = ', '.join(map(str, columns))
 
-    statement = 'INSERT INTO ' + str(table_name) + '(' + list_columns + ')' \
-        + 'VALUES (' + values + ')'
+    if return_field is not None:
+        statement = 'INSERT INTO ' + str(table_name) + '(' + list_columns + ')' \
+            + 'VALUES (' + values + ') RETURNING ' + str(return_field)
+    else:
+        statement = 'INSERT INTO ' + str(table_name) + '(' + list_columns + ')' \
+                    + 'VALUES (' + values + ')'
 
     return statement
 
@@ -134,8 +285,6 @@ def check_table(table_name, data_json):
             for element in mapping[table_name]['not_required']:
                 junction_columns.append(element)
 
-    print(junction_columns)
-
     for row in data:
         for key in row:
             if key in columns:
@@ -161,10 +310,12 @@ def check_table(table_name, data_json):
         # if there are junction hooks check disregard columns for junctions
         if len(junction_columns) > 0:
             if item not in check_columns and item not in junction_columns:
-                return 'column: >>' + str(item) + '<< was not found in table: >>' + table_name + '<<.'
+                return 'column: >>' + str(item) + '<< was not found in table: >>'\
+                       + table_name + '<<.'
         else:
             if item not in check_columns:
-                return 'column: >>' + str(item) + '<< was not found in table: >>' + table_name + '<<.'
+                return 'column: >>' + str(item) + '<< was not found in table: >>'\
+                       + table_name + '<<.'
 
     return True
 
@@ -179,11 +330,61 @@ def insert_data(table_name, data_json):
     """
 
     if table_name in mapping:
+        junction_fields = []
+
         check_junction_data = validate_junction_data(table_name, data_json)
+
+        if 'required' in mapping[table_name]:
+            if mapping[table_name]['required'] is not None:
+                for element in mapping[table_name]['required']:
+                    junction_fields.append(element)
+
+        if 'not_required' in mapping[table_name]:
+            if mapping[table_name]['not_required'] is not None:
+                for element in mapping[table_name]['not_required']:
+                    junction_fields.append(element)
 
         if check_junction_data is True:
             # keep going with the upload
             print('I am inserting table data that has a hook for junction inserts')
+
+            columns = get_data_columns(data_json)
+
+            for row in data_json:
+
+                new_row = check_data_columns(columns, row)
+
+                junction_inserts = []
+                return_column = None
+
+                for column, value in new_row.items():
+
+                    junction_insert = None
+
+                    if column in junction_fields \
+                            and value is not None:
+                        junction_object = get_junctions_foreign_key(table_name, column, value)
+
+                        junction_insert = \
+                            create_abstract_junction_insert(
+                                table_name,
+                                junction_object['junction_table']
+                            )
+
+                        return_column = get_hooked_table_id(
+                            table_name,
+                            junction_object['junction_table']
+                        )
+
+                    if junction_insert is not None:
+                        junction_inserts.append(junction_insert)
+
+                if return_column is not None:
+                    statement = create_abstract_insert(table_name, data_json, return_column)
+                    print(statement)
+                    for insert in junction_inserts:
+                        print(insert)
+
         else:
             return check_junction_data
     else:

@@ -27,6 +27,7 @@ Mapping structure...
         'junction_tables': {
             'junction_table_name': {
                 'mapped_table': 'table_name',
+                'mapped_field': 'column_name',
                 'columns': {
                     'column_name': {
                         'reference_table': 'reference_column_name',
@@ -65,6 +66,10 @@ Mapping structure...
         'table_name'        => the name of the table you have the many to many
             relationship with (selectors column's table)
 
+    'mapped_field'          => the KEY REQUIRED for the uploader to work
+        'column_name'       => the name of the primary key column you will be
+            fetching from the 'mapped_table'
+
     'columns'               => the KEY REQUIRED for the uploader to work
         'column_name'       => the name of the column mapped in your
             junction table
@@ -98,6 +103,7 @@ mapping = {
         'junction_tables': {
             'leads_countries': {
                 'mapped_table': 'countries',
+                'mapped_field': 'id',
                 'columns': {
                     'lead_fid': {
                         'leads': 'id',
@@ -109,23 +115,25 @@ mapping = {
             },
             'leads_sectors': {
                 'mapped_table': 'sectors',
+                'mapped_field': 'id',
                 'columns': {
                     'lead_fid': {
                         'leads': 'id',
                     },
                     'sector_id': {
-                        'sector_id': 'id',
+                        'sectors': 'id',
                     }
                 },
             },
             'leads_tests': {
                 'mapped_table': 'tests',
+                'mapped_field': 'id',
                 'columns': {
                     'lead_fid': {
                         'leads': 'id',
                     },
-                    'sector_id': {
-                        'sector_id': 'id',
+                    'test_id': {
+                        'tests': 'id',
                     }
                 },
             },
@@ -138,9 +146,9 @@ mapping = {
             'test_name'
         ],
         'selectors': {
-            'sector': 'lead_sectors',
-            'country_name': 'lead_countries',
-            'test_name': 'lead_tests',
+            'sector': 'leads_sectors',
+            'country_name': 'leads_countries',
+            'test_name': 'leads_tests',
         }
     }
 }
