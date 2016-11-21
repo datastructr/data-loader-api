@@ -1,7 +1,7 @@
 from flask_restful import Resource, request
 
 from app.api import api
-from app.api.controllers import upload
+from app.api.controllers.upload import post_table
 from app.helpers import api_response
 
 # Import test JSON data
@@ -15,6 +15,11 @@ from app.data.bulk_upload import (
 class Upload(Resource):
     """Upload Class is the Resource for uploading a data to a single table
 
+    For a single table ingestion this will be a single controller call.
+
+    For multiple tables in the ingestion JSON -- call ``upload.post_table``
+    on each element in the ``multiple`` array from the JSON object.
+
     :extends Resource
     :returns: a JSON response
     """
@@ -27,14 +32,14 @@ class Upload(Resource):
         if 'multiple' in json_data:
             for table in test_multiple_json['multiple']:
                 if 'table' in table and 'data' in table:
-                    response.append(upload.post_table(table))
+                    response.append(post_table(table))
                 else:
                     return {
                         'error': 'You must specify a table with data to upload'
                     }
         else:
             if 'table' in json_data and 'data' in json_data:
-                response = upload.post_table(test_table_json)
+                response = post_table(test_table_json)
             else:
                 return {
                     'error': 'You must specify a table with data to upload'

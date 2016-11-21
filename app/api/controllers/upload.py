@@ -9,8 +9,8 @@ from app.api.controllers.schema import get_table_headers
 
 
 def prune_dictionary(table_name, row):
-    """prune_dictionary =>> function to remove the data in the row data that
-    is not needed for the ingestion insert statement
+    """Remove the data in the row data that is not needed for the ingestion
+    trigger table's insert statement
 
     :param table_name: String of the table's name
     :param row: dictionary of row data
@@ -30,8 +30,8 @@ def prune_dictionary(table_name, row):
 
 
 def create_abstract_junction_insert(table_name, junction_table_name):
-    """create_abstract_junction_insert =>> function to create an abstracted
-    parameters based insertion into a junction table
+    """Create an abstracted parameters based insert into statement for
+     a table in the configuration mapped junction settings
 
     :param table_name: String table name hooked with a junction insert
     :param junction_table_name: String junction table's name
@@ -73,8 +73,8 @@ def create_abstract_junction_insert(table_name, junction_table_name):
 
 
 def get_junctions_foreign_key(table_name, column_name, column_value):
-    """get_junctions_foreign_key =>> function that will select from a table in
-    the database to get a primary key to insert into the junction table
+    """Select from a table in the database to get a primary key to
+    map to the insert into ``junction table``
 
     :param table_name: String table name hooked with a junction insert
     :param column_name: String column name where clause will have
@@ -158,8 +158,8 @@ def get_junctions_foreign_key(table_name, column_name, column_value):
 
 
 def validate_junction_data(table_name, data_json):
-    """validate_junction_data =>> function to take the data JSON and determine
-    whether or not it's a valid ingestion set (must pass required fields)
+    """Take the data JSON and determine whether or not it's a valid ingestion
+     set (must pass ``required`` fields)
 
     :param table_name: String of a table's name
     :param data_json: dictionary of all the ingestion data for a table
@@ -198,9 +198,8 @@ def validate_junction_data(table_name, data_json):
 
 
 def check_data_columns(column_list, data_row):
-    """check_data_columns =>> function to take a list of columns that are being
-    inserted into (from the data_json) and make sure there are parameters for
-    the abstracted insert statement
+    """Take a list of columns that are being inserted into (from the data_json)
+    and make sure there are parameters for the abstracted insert statement
 
     :param column_list: list of columns name
     :param data_row: dictionary for a specific ingest row
@@ -215,7 +214,7 @@ def check_data_columns(column_list, data_row):
 
 
 def get_data_columns(data_json):
-    """get_data_columns =>> generic get 'column' names (keys) from a dictionary
+    """A generic get 'column' names (keys) from a dictionary
 
     :param data_json: dictionary of data
     :return: list of column names
@@ -225,7 +224,7 @@ def get_data_columns(data_json):
     for row in data_json:
         for key in row:
             if key in columns:
-                break
+                continue
             else:
                 columns.append(key)
 
@@ -233,8 +232,8 @@ def get_data_columns(data_json):
 
 
 def get_hooked_table_id(table_name, junction_table_name):
-    """get_hooked_table_id =>> function to return the mapped primary unique id
-    to "RETURN" it's value after insert
+    """Return the mapped primary unique id to "RETURNING" it's value after
+    insert
 
     :param table_name: String table name hooked with a junction insert
     :param junction_table_name: String junction table's name
@@ -248,8 +247,8 @@ def get_hooked_table_id(table_name, junction_table_name):
 
 
 def create_abstract_insert(table_name, row_json, return_field=None):
-    """create_abstract_insert =>> function to create an abstracted raw insert
-    psql statement for inserting a single row of data
+    """Create an abstracted raw insert psql statement for inserting a single
+    row of data
 
     :param table_name: String of a table_name
     :param row_json: dictionary of ingestion data
@@ -281,8 +280,8 @@ def create_abstract_insert(table_name, row_json, return_field=None):
 
 
 def check_table(table_name, data_json):
-    """check_table =>> function that checks whether or not the specified table
-    and the columns in that data are valid
+    """Checks whether or not the specified table and it's respected columns
+    in the data JSON are valid
 
     :param table_name: String of the table's name
     :param data_json: the full data ingestion JSON sent through the endpoint
@@ -342,8 +341,12 @@ def check_table(table_name, data_json):
 
 
 def insert_data(table_name, data_json):
-    """insert_data =>> function to take in a json object and insert the data
-    into the database
+    """Take a full table's data JSON object and insert the data into the
+    database.
+
+    This will properly call junction insertions and regular inserts based on
+    whether or not the fields in the rows are requirements in the mapping
+    configurations.
 
     :param table_name: String -> table's name
     :param data_json: json object with rows -> columns -> data
@@ -493,8 +496,9 @@ def insert_data(table_name, data_json):
 
 
 def post_table(json):
-    """post_table =>> function to take a single json object and check -> insert
-    the data to a specific table
+    """The top level controllers function to start the call stack and call
+    ``insert_data`` to then start the ingestion process for a single data's
+    table.
 
     :param json: The JSON Object sent to a POST endpoint
     :returns: dictionary response
