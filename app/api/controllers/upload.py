@@ -466,9 +466,8 @@ def insert_data(table_name, data_json):
 
         try:
 
-            disable_fk_constraints = sqlalchemy.text('ALTER TABLE %s DISABLE TRIGGER USER' % table_name)
-
-            connection.execute(disable_fk_constraints)
+            # disable_fk_constraints = sqlalchemy.text('ALTER TABLE %s DISABLE TRIGGER USER' % table_name)
+            # connection.execute(disable_fk_constraints)
 
             for row in data_json:
                 statement = create_abstract_insert(table_name, row)
@@ -479,14 +478,14 @@ def insert_data(table_name, data_json):
 
             transaction.commit()
 
-            enable_fk_constraints = sqlalchemy.text('ALTER TABLE %s ENABLE TRIGGER USER' % table_name)
-            connection.execute(enable_fk_constraints)
+            # enable_fk_constraints = sqlalchemy.text('ALTER TABLE %s ENABLE TRIGGER USER' % table_name)
+            # connection.execute(enable_fk_constraints)
 
         except SQLAlchemyError as e:
             transaction.rollback()
 
-            enable_fk_constraints = sqlalchemy.text('ALTER TABLE %s ENABLE TRIGGER USER' % table_name)
-            connection.execute(enable_fk_constraints)
+            # enable_fk_constraints = sqlalchemy.text('ALTER TABLE %s ENABLE TRIGGER USER' % table_name)
+            # connection.execute(enable_fk_constraints)
 
             return {'insert_error': e}
 
