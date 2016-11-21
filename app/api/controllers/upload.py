@@ -5,6 +5,28 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
 from app.table_mappings import mapping
+from app.api.controllers.schema import get_table_headers
+
+
+def prune_dictionary(table_name, row):
+    """prune_dictionary =>> function to remove the data in the row data that
+    is not needed for the ingestion insert statement
+
+    :param table_name: String of the table's name
+    :param row: dictionary of row data
+    :return: dictionary for new row ingestion
+    """
+
+    # call controllers.schema function to describe the table_name's schema
+    headers = get_table_headers(table_name)
+
+    new_dict = {}
+
+    for header in headers:
+        if header in row:
+            new_dict[header] = row[header]
+
+    return new_dict
 
 
 def create_abstract_junction_insert(table_name, junction_table_name):
@@ -20,8 +42,8 @@ def create_abstract_junction_insert(table_name, junction_table_name):
     if 'junction_tables' in mapping[table_name]:
         if junction_table_name in mapping[table_name]['junction_tables']:
             if 'columns' in mapping[table_name]['junction_tables'][junction_table_name]:
-                for column, value in mapping[table_name]['junction_tables'][junction_table_name]['columns'].items():
-                    columns.append(column)
+                for key, value in mapping[table_name]['junction_tables'][junction_table_name]['columns'].items():
+                    columns.append(key)
             else:
                 return {
                     'error': 'Upload failed columns are required in mapping'
@@ -108,6 +130,7 @@ def get_junctions_foreign_key(table_name, column_name, column_value):
 
                     return {
                         'junction_table': junction_table,
+                        'column': select_field,
                         'value': value,
                     }
 
@@ -224,25 +247,22 @@ def get_hooked_table_id(table_name, junction_table_name):
                 return value[table_name]
 
 
-def create_abstract_insert(table_name, data_json, return_field):
+def create_abstract_insert(table_name, row_json, return_field=None):
     """create_abstract_insert =>> function to create an abstracted raw insert
     psql statement for inserting a single row of data
 
     :param table_name: String of a table_name
-    :param data_json: dictionary of ingestion data
+    :param row_json: dictionary of ingestion data
+    :param return_field: String of the column name to RETURNING in statement
     :return: String of an insert statement
     """
-    table_name = table_name
-    data = data_json
-
     columns = []
 
-    for row in data:
-        for key in row:
-            if key in columns:
-                break
-            else:
-                columns.append(key)
+    for key, value in row_json.items():
+        if key in columns:
+            continue
+        else:
+            columns.append(key)
 
     values = [':' + item for item in columns]
 
@@ -252,10 +272,10 @@ def create_abstract_insert(table_name, data_json, return_field):
 
     if return_field is not None:
         statement = 'INSERT INTO ' + str(table_name) + '(' + list_columns + ')' \
-            + 'VALUES (' + values + ') RETURNING ' + str(return_field)
+            + ' VALUES (' + values + ') RETURNING ' + str(return_field)
     else:
         statement = 'INSERT INTO ' + str(table_name) + '(' + list_columns + ')' \
-                    + 'VALUES (' + values + ')'
+                    + ' VALUES (' + values + ')'
 
     return statement
 
@@ -345,50 +365,96 @@ def insert_data(table_name, data_json):
                     junction_fields.append(element)
 
         if check_junction_data is True:
-            # keep going with the upload
-            print('I am inserting table data that has a hook for junction inserts')
 
             columns = get_data_columns(data_json)
 
-            for row in data_json:
+            connection = db.engine.connect()
 
-                new_row = check_data_columns(columns, row)
+            transaction = connection.begin()
 
-                junction_inserts = []
-                return_column = None
+            try:
+                for row in data_json:
 
-                for column, value in new_row.items():
+                    new_row = check_data_columns(columns, row)
 
-                    junction_insert = None
+                    junction_inserts = []
+                    return_column = None
 
-                    if column in junction_fields \
-                            and value is not None:
-                        junction_object = get_junctions_foreign_key(table_name, column, value)
+                    for column, value in new_row.items():
 
-                        junction_insert = \
-                            create_abstract_junction_insert(
+                        junction_insert = None
+
+                        if column in junction_fields \
+                                and value is not None:
+                            junction_object = get_junctions_foreign_key(table_name, column, value)
+
+                            junction_insert = \
+                                create_abstract_junction_insert(
+                                    table_name,
+                                    junction_object['junction_table']
+                                )
+
+                            return_column = get_hooked_table_id(
                                 table_name,
                                 junction_object['junction_table']
                             )
 
-                        return_column = get_hooked_table_id(
-                            table_name,
-                            junction_object['junction_table']
-                        )
+                        if junction_insert is not None:
 
-                    if junction_insert is not None:
-                        junction_inserts.append(junction_insert)
+                            column_value = dict()
+                            foreign_field = None
 
-                if return_column is not None:
-                    statement = create_abstract_insert(table_name, data_json, return_column)
-                    print(statement)
-                    for insert in junction_inserts:
-                        print(insert)
+                            for key, fields in \
+                                    mapping[table_name]['junction_tables'][junction_object['junction_table']][
+                                        'columns'].items():
+                                if table_name in fields:
+                                    column_value[key] = junction_object['value']
+                                else:
+                                    foreign_field = key
+
+                            junction_inserts.append({
+                                'insert': junction_insert,
+                                'value': column_value,
+                                'foreign_field': foreign_field,
+                            })
+
+                    if return_column is not None:
+                        # remove the unwanted fields in row
+                        row_data = prune_dictionary(table_name, new_row)
+
+                        statement = create_abstract_insert(table_name, row_data, return_column)
+                        insert_statement = sqlalchemy.text(statement)
+
+                        result = connection.execute(insert_statement, **row_data)
+
+                        trigger_table_fk = None
+                        for item in result:
+                            trigger_table_fk = item[return_column]
+
+                        for junction_insert in junction_inserts:
+
+                            if trigger_table_fk is None:
+                                return 'There was an error with inserting the junction mapping'
+
+                            junction_values = junction_insert['value']
+                            junction_values[junction_insert['foreign_field']] = trigger_table_fk
+
+                            insert_statement = sqlalchemy.text(junction_insert['insert'])
+
+                            connection.execute(insert_statement, **junction_values)
+
+                transaction.commit()
+
+            except SQLAlchemyError as e:
+                transaction.rollback()
+
+                return {'insert_error': e}
+
+            return 'successful insert of data into >>' + table_name + '<<'
 
         else:
             return check_junction_data
     else:
-        print('I am not inserting table data that has a hook for junction inserts')
         results = []
 
         columns = get_data_columns(data_json)
@@ -403,11 +469,9 @@ def insert_data(table_name, data_json):
 
             connection.execute(disable_fk_constraints)
 
-            statement = create_abstract_insert(table_name, data_json)
-
-            insert_sql = sqlalchemy.text(statement)
-
             for row in data_json:
+                statement = create_abstract_insert(table_name, row)
+                insert_sql = sqlalchemy.text(statement)
                 new_row = check_data_columns(columns, row)
                 result = connection.execute(insert_sql, **new_row)
                 results.append(result)

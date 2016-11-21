@@ -10,6 +10,37 @@ from app.table_mappings import (
 )
 
 
+def get_table_headers(table_name):
+    """get_single_table =>> function to retrieve and return a
+    single table's header names
+
+    :param table_name: The table_name string to use
+    :returns: list of Strings
+    """
+    if table_name in junction_tables:
+        return {'error': 'The schema name you are wishing to GET is not valid'}
+
+    metadata = MetaData()
+
+    metadata.reflect(bind=db.engine)
+
+    try:
+        table = metadata.tables[table_name]
+
+        headers = []
+
+        for column in table.columns:
+            headers.append(str(column.name))
+
+        if len(headers) == 0:
+            return {'error': 'The schema name you are wishing to GET is not valid'}
+
+    except KeyError:
+        return {'error': 'The schema name you are wishing to GET is not valid'}
+
+    return headers
+
+
 def get_single_table(table_name):
     """get_single_table =>> function to retrieve and return a
     single table's schema

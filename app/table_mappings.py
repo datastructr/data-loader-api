@@ -106,7 +106,7 @@ mapping = {
                 'mapped_field': 'id',
                 'columns': {
                     'lead_fid': {
-                        'leads': 'id',
+                        'leads': 'fid',
                     },
                     'country_id': {
                         'countries': 'id',
@@ -118,7 +118,7 @@ mapping = {
                 'mapped_field': 'id',
                 'columns': {
                     'lead_fid': {
-                        'leads': 'id',
+                        'leads': 'fid',
                     },
                     'sector_id': {
                         'sectors': 'id',
@@ -130,7 +130,7 @@ mapping = {
                 'mapped_field': 'id',
                 'columns': {
                     'lead_fid': {
-                        'leads': 'id',
+                        'leads': 'fid',
                     },
                     'test_id': {
                         'tests': 'id',
