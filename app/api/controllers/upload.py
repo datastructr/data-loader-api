@@ -295,15 +295,16 @@ def check_table(table_name, data_json):
     junction_columns = []
 
     # if the table has junction hooks on it disregard the junction columns
-    if 'required' in mapping[table_name]:
-        if mapping[table_name]['required'] is not None:
-            for element in mapping[table_name]['required']:
-                junction_columns.append(element)
+    if table_name in mapping:
+        if 'required' in mapping[table_name]:
+            if mapping[table_name]['required'] is not None:
+                for element in mapping[table_name]['required']:
+                    junction_columns.append(element)
 
-    if 'not_required' in mapping[table_name]:
-        if mapping[table_name]['not_required'] is not None:
-            for element in mapping[table_name]['not_required']:
-                junction_columns.append(element)
+        if 'not_required' in mapping[table_name]:
+            if mapping[table_name]['not_required'] is not None:
+                for element in mapping[table_name]['not_required']:
+                    junction_columns.append(element)
 
     for row in data:
         for key in row:
