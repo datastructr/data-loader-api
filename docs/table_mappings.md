@@ -10,6 +10,8 @@ As engineers we tackle all kinds of problems ranging from all types of industrie
 * The mapping structure we have lined out is not in it's final iteration 
     * We plan to build it out more efficiently in the future based on performance and efficiency
     
+You can see an example table_mappings file [HERE](app/example_table_mappings.py) --> you must rename it to **_table_mappings.py_** and configure it to fit your schema.
+
 ## Future Iterations
 
 * Having the capability for mapping of JOIN tables to a specific base (hooked) table for ingestion
