@@ -19,8 +19,15 @@ The backend upload process will ingestion data using **transactions** -- this is
     1. A specific table's schema - the _table_name_ passed through the URL
     2. A full database's schema (all tables with their unique schemas)
     3. A upload endpoint that will take a specifically structure JSON Object that will be sent through from the client application.
+    
+### Mapping Configurations
+
+The key to the [**Mapping Configuration**](table_mappings.md) settings is that as engineers we try and solve complex problems through data analysis and having tons of data we want to correctly map in the database this is key! We have the capabilities to logically and dynamically ingested "many-to-many" data sets through junciton mapping configurations.
+
+The concept of [**many-to-many**](https://en.wikipedia.org/wiki/Many-to-many_(data_model)) relationships can very powerful in specific use cases. We want to offer that ingestion integration we offer while still effectively allow for more advanced structured schemas.
 
 ## Future Iteration Features
 
-- [ ] Allowing for multiple database connections
-- [ ] JSON Web Token authentication (right now we are leaving client-side developers handle authentication)
+- Allowing for multiple database connections
+- Support JOIN table mappings
+- Support MySQL/other databases

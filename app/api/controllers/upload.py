@@ -405,33 +405,41 @@ def insert_data(table_name, data_json):
 
                         if junction_insert is not None:
 
-                            column_value = dict()
+                            column_value = None
+                            column_field = None
                             foreign_field = None
 
                             for key, fields in \
                                     mapping[table_name]['junction_tables'][junction_object['junction_table']][
                                         'columns'].items():
                                 if table_name in fields:
-                                    column_value[key] = junction_object['value']
+                                    column_value = junction_object['value']
+                                    column_field = key
                                 else:
                                     foreign_field = key
 
                             junction_inserts.append({
                                 'insert': junction_insert,
                                 'value': column_value,
+                                'column': column_field,
                                 'foreign_field': foreign_field,
                             })
 
                     if return_column is not None:
+
                         # remove the unwanted fields in row
                         row_data = prune_dictionary(table_name, new_row)
 
+                        # abstracted insertion statement
                         statement = create_abstract_insert(table_name, row_data, return_column)
+
+                        # must convert the statement to ``text`` from SQLAlchemy
                         insert_statement = sqlalchemy.text(statement)
 
                         result = connection.execute(insert_statement, **row_data)
 
                         trigger_table_fk = None
+
                         for item in result:
                             trigger_table_fk = item[return_column]
 
@@ -440,8 +448,9 @@ def insert_data(table_name, data_json):
                             if trigger_table_fk is None:
                                 return 'There was an error with inserting the junction mapping'
 
-                            junction_values = junction_insert['value']
-                            junction_values[junction_insert['foreign_field']] = trigger_table_fk
+                            junction_values = dict()
+                            junction_values[junction_insert['column']] = trigger_table_fk
+                            junction_values[junction_insert['foreign_field']] = junction_insert['value']
 
                             insert_statement = sqlalchemy.text(junction_insert['insert'])
 
