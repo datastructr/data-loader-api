@@ -31,3 +31,4 @@ env
 template.json
 app/data
 /docs/CONTRIB.md
+/app/table_mappings.py

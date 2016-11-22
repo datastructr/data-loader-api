@@ -5,7 +5,7 @@ from flask import jsonify
 
 
 def api_response(function):
-    """api_response =>> decorator function that creates a standard response
+    """Decorator function that creates a standard API response
 
     :function: The dictionary returned will have a key-value pair from below
         success -> GET, 200

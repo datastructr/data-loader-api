@@ -27,12 +27,14 @@ def abort_database_insert_error(row):
 # This function was written might be used for later date
 #   Moved to utils for now
 def get_sequence_names():
-    """get_sequence_name =>> function that will return all of the columns that
-    are associated with sequences so they will be sanity checked and will not
-    allow for insertion
+    """Return all of the columns that are associated with sequences so they
+    will be sanity checked and will not allow for insertion
 
     :return: list of sequences associated with column_names
     """
+
+    from sqlalchemy import text
+
     results = []
 
     sequences_info_sql = text('SELECT * FROM information_schema.sequences;')

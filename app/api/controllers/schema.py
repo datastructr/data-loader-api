@@ -11,8 +11,7 @@ from app.table_mappings import (
 
 
 def get_table_headers(table_name):
-    """get_single_table =>> function to retrieve and return a
-    single table's header names
+    """Retrieve and return a single table's header names
 
     :param table_name: The table_name string to use
     :returns: list of Strings
@@ -42,8 +41,7 @@ def get_table_headers(table_name):
 
 
 def get_single_table(table_name):
-    """get_single_table =>> function to retrieve and return a
-    single table's schema
+    """Retrieve and return a single table's schema
 
     :param table_name: The table_name string to use
     :returns: dictionary response
@@ -110,8 +108,7 @@ def get_single_table(table_name):
 
 
 def get_tables():
-    """get_table =>> function to retrieve and return all of a
-    database's table-schema pairs
+    """Retrieve and return all of a database's table-schema pairs
 
     :returns: dictionary response
     """
