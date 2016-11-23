@@ -3,9 +3,10 @@
 
 # Testing
 pytest
-mock
-coverage
-factory-boy==2.4.0
+pytest-base-url
+pytest-cov
+pytest-factoryboy
+pytest-flask
 webtest
 
 # Style checkers/linters
