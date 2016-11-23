@@ -30,5 +30,4 @@ pip-log.txt
 env
 template.json
 app/data
-/docs/self_hosting.md
 /app/table_mappings.py
