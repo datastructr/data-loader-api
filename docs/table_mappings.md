@@ -54,8 +54,7 @@ mapping = {
 ```
 ---
 
-* The `table_name` key is a specific **key** that is required for the upload process to parse correctly.
-    * `ingest_table_name` is the name of the table in the database that will "fire" so called junction inserts based on uploading data into it.
+* The `table_name` is the name of the table in the database that will "fire" so called junction inserts based on uploading data into it.
 
 An example would be if an application has 'Books' and 'Authors'
 
