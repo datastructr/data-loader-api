@@ -7,6 +7,8 @@ pytest-base-url
 pytest-cov
 pytest-factoryboy
 pytest-flask
+pytest-sugar
+pytest-xdist
 webtest
 
 # Style checkers/linters

@@ -517,6 +517,8 @@ def post_table(json):
     if 'table' in json:
         if json['table'] is None or json['table'] == '':
             return {'error': 'You must specify a table with data to upload'}
+    else:
+        return {'error': 'You must have the \'table\' key in your JSON object'}
 
     if 'data' in json:
         if json['data'] is None or json['data'] == '':
@@ -535,3 +537,5 @@ def post_table(json):
                     return {'error': result}
             else:
                 return {'error': check}
+    else:
+        return {'error': 'You must have the \'data\' key in your JSON object'}

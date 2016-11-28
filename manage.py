@@ -15,9 +15,18 @@ def _make_context():
     """
     return {'app': app, 'db': db}
 
+#  access python shell with context
+manager.add_command(
+    'shell',
+    Shell(make_context=_make_context)
+)
 
-manager.add_command('server', Server())
-manager.add_command('shell', Shell(make_context=_make_context))
+# run the application
+manager.add_command(
+    'startserver',
+    Server(port=(os.getenv('FLASK_PORT') or 5000), host='0.0.0.0')
+)
+
 
 if __name__ == '__main__':
     manager.run()
