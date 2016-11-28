@@ -35,26 +35,26 @@
 Side note -- you can add environment variables with [autoenv](https://github.com/kennethreitz/autoenv)
         
 ```bash
-deactivate
-pip install autoenv
-touch .env
+$ deactivate
+$ pip install autoenv
+$ touch .env
 ```
 
 ---
 ...in your .env file
 
-```
+```bash
 source env/bin/activate
 export DATABASE_URL="your_postgres_database_url"
 export FLASK_ENV="development"
 export SECRET_KEY="i_like_green_eggs_and_ham"
 ```
 ---
-then...
+then... in terminal
 
-```
-echo "source `which activate.sh`" >> ~/.bashrc
-source ~/.bashrc
+```bash
+$ echo "source `which activate.sh`" >> ~/.bashrc
+$ source ~/.bashrc
 ```
 
 Now move, `cd`, up out of the application's directory and move back into it the environment should already be activated and the environment variables should be set.
