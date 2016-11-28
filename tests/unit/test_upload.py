@@ -19,6 +19,43 @@ def test_validate_junction_data(valid_data_json):
     assert upload.validate_junction_data('leads', valid_data_json) is True
 
 
+def test_get_data_columns(valid_data_json):
+    lead_columns = [
+        'project_title',
+        'project_number',
+        'project_size',
+        'project_description',
+        'country_name',
+        'sector',
+        'test_name',
+    ]
+
+    # Test made up list and list of dicts =====================================
+    list_one = [
+        'one',
+        'two',
+        'three',
+    ]
+
+    one_object = [
+        {
+            'one': 'one',
+            'two': 'two',
+            'three': 'three',
+        },
+        {
+            'one': 'one',
+            'three': 'three',
+        },
+    ]
+    # =========================================================================
+
+    assert set(upload.get_data_columns(valid_data_json)) == \
+        set(lead_columns)
+    assert set(upload.get_data_columns(one_object)) == \
+        set(list_one)
+
+
 def test_post_table():
     """Testing out the else constraints on post_table method
     """
