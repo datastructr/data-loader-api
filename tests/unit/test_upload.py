@@ -16,10 +16,44 @@ def test_create_abstract_junction_insert():
 
 
 def test_validate_junction_data(valid_data_json):
+    """Testing out validate_junction_data method this is supposed to return a
+    Boolean True or an error message
+    """
+    # TODO flush out better tests for this method
     assert upload.validate_junction_data('leads', valid_data_json) is True
 
 
+def test_check_data_columns():
+    """Testing out check_data_columns method this is supposed to return a new
+    dictionary that has values for all the elements in a list
+
+    The new dictionary will have elements from the list as it's keys if there
+    is key missing from the dictionary
+    """
+    row_dict = {
+        "one": "value_one",
+        "two": "value_two",
+    }
+
+    columns = ['one', 'two', 'three']
+
+    result_dict = {
+        "one": "value_one",
+        "two": "value_two",
+        "three": None,
+    }
+
+    assert upload.check_data_columns(columns, row_dict) == \
+        result_dict
+    # Make abstract assertion error here for future pushes
+    # assert upload.check_data_columns(columns, row_dict) != \
+    #     row_dict, "Missing another key-value pair"
+
+
 def test_get_data_columns(valid_data_json):
+    """Testing out get_data_columns method this is supposed to return a list of
+    elements that are all the keys in a dictionary or JSON Object
+    """
     lead_columns = [
         'project_title',
         'project_number',
