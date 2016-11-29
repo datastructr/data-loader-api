@@ -40,6 +40,21 @@ def valid_data_json():
 
 
 @pytest.fixture(scope='module')
+def valid_row_json():
+    """This is a JSON Object for the ``data`` but in a Dictionary syntax that
+    will be used throughout testing methods
+    :return: A JSON type of Object with keys and data for the API to handle
+    :returns: JSON Object
+    """
+    return {
+        "project_title": "title_3",
+        "project_number": "3",
+        "project_size": "1",
+        "project_description": "description_3",
+    }
+
+
+@pytest.fixture(scope='module')
 def valid_json():
     """This is a JSON Object but in a Dictionary syntax that will be used
     throughout testing methods

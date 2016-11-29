@@ -8,8 +8,10 @@ from app.api.controllers import upload
 
 
 def test_create_abstract_junction_insert():
-    one = 'INSERT INTO leads_countries(lead_fid, country_id)VALUES (:lead_fid, :country_id)'
-    two = 'INSERT INTO leads_countries(country_id, lead_fid)VALUES (:country_id, :lead_fid)'
+    one = 'INSERT INTO leads_countries(lead_fid, country_id)' \
+          'VALUES (:lead_fid, :country_id)'
+    two = 'INSERT INTO leads_countries(country_id, lead_fid)' \
+          'VALUES (:country_id, :lead_fid)'
 
     assert upload.create_abstract_junction_insert('leads', 'leads_countries') == one \
         or upload.create_abstract_junction_insert('leads', 'leads_countries') == two
@@ -88,6 +90,46 @@ def test_get_data_columns(valid_data_json):
         set(lead_columns)
     assert set(upload.get_data_columns(one_object)) == \
         set(list_one)
+
+
+def test_get_hooked_table_id():
+    """Testing out get_hooked_table_id method this is supposed to return a
+    String of the columns name that references the first parameter's FK column
+    name
+    """
+
+    # test BIDS mapping data -> must return ``fid`` (fk from the leads table)
+    assert upload.get_hooked_table_id('leads', 'leads_countries') == \
+        'fid'
+    assert upload.get_hooked_table_id('leads', 'leads_tests') == \
+        'fid'
+    assert upload.get_hooked_table_id('leads', 'leads_sectors') == \
+        'fid'
+    assert upload.get_hooked_table_id('leads', 'table_not_there') == \
+        {'error':
+            'Mapping configuration error. Missing the junction table: table_not_there'}
+
+
+def test_create_abstract_insert():
+    table_json = {
+        'one': 'one',
+        'two': 'two',
+    }
+
+    table_insert_one = 'INSERT INTO table(one, two) ' \
+                   'VALUES (:one, :two) RETURNING fid'
+    table_insert_two = 'INSERT INTO table(two, one) ' \
+                   'VALUES (:two, :one) RETURNING fid'
+
+    no_return_insert_one = 'INSERT INTO table(one, two) ' \
+                       'VALUES (:one, :two)'
+    no_return_insert_two = 'INSERT INTO table(two, one) ' \
+                       'VALUES (:two, :one)'
+
+    assert upload.create_abstract_insert('table', table_json, 'fid') == table_insert_one \
+        or upload.create_abstract_insert('table', table_json, 'fid') == table_insert_two
+    assert upload.create_abstract_insert('table', table_json) == no_return_insert_one \
+        or upload.create_abstract_insert('table', table_json) == no_return_insert_two
 
 
 def test_post_table():

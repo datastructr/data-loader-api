@@ -244,6 +244,8 @@ def get_hooked_table_id(table_name, junction_table_name):
                 mapping[table_name]['junction_tables'][junction_table_name]['columns'].items():
             if table_name in value:
                 return value[table_name]
+    else:
+        return {'error': 'Mapping configuration error. Missing the junction table: ' + str(junction_table_name)}
 
 
 def create_abstract_insert(table_name, row_json, return_field=None):
