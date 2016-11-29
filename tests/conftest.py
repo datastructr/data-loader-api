@@ -1,4 +1,5 @@
 import pytest
+from flask import Response
 from app import create_app
 
 
@@ -106,7 +107,7 @@ def app(request):
     :returns: flask.Flask object
     """
 
-    app = create_app('development')
+    app = create_app()
     ctx = app.app_context()
 
     ctx.push()

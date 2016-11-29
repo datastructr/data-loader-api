@@ -5,9 +5,9 @@
 pytest
 pytest-base-url
 pytest-cov
+pytest-env
 pytest-factoryboy
 pytest-flask
-pytest-sugar
 pytest-xdist
 webtest
 

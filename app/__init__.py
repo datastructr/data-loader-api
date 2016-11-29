@@ -9,6 +9,7 @@ from flask import Flask
 from app.config import (
     ProductionConfig,
     DevelopmentConfig,
+    TestingConfig,
 )
 from app.extensions import (
     db,
@@ -19,6 +20,8 @@ from app.api import api_blueprint
 
 if os.environ.get("FLASK_ENV") == 'production':
     DefaultConfig = ProductionConfig
+elif os.environ.get("FLASK_ENV") == 'testing':
+    DefaultConfig = TestingConfig
 else:
     DefaultConfig = DevelopmentConfig
 

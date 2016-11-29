@@ -38,4 +38,7 @@ class TestingConfig(BaseConfig):
     ENV = 'testing'
     TESTING = True
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'postgresql://'
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        'DATABASE_URL',
+        'postgresql://postgres@localhost/bulk_upload',
+    )
