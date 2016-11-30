@@ -11,7 +11,7 @@ addons:
 
 before_script:
   - psql -c 'create database "bulk_upload";' -U postgres
-  - psql -f ./tests/test_bulk_upload.sql -U postgres -d bulk_upload
+  - psql -f tests/test_data/test_bulk_upload.sql -U postgres -d bulk_upload
 
 before_install:
   - export DATABASE_URL="postgresql://postgres@localhost/bulk_upload"
