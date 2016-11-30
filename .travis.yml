@@ -2,11 +2,12 @@ language: python
 python:
   - "3.5"
 
-services:
-  - postgresql
-
+sudo: required
+dist: precise
 addons:
-  postgresql: "9.5"
+    postgresql: "9.5"
+services:
+    - postgresql
 
 before_script:
   - psql -c "CREATE DATABASE bulk_upload;" -U postgres
