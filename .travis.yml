@@ -5,12 +5,12 @@ python:
 services:
   - postgresql
 
-install: "pip install -r requirements/development.txt"
-
 addons:
   postgresql: "9.5"
 
 before_script:
   - psql -c "CREATE DATABASE bulk_upload;" -U postgres
+
+install: "pip install -r requirements/development.txt"
 
 script: py.test --cov=app/api/controllers tests/
