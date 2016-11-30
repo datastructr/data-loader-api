@@ -76,7 +76,7 @@ def get_single_table(table_name):
 
             properties.append({
                 'foreign_keys': foreign_keys,
-                'primary_key': column.primary_key,
+                # 'primary_key': column.primary_key,
                 'nullable': str(column.nullable),
                 'type': str(column.type),
                 'column': str(column.name)
@@ -154,7 +154,7 @@ def get_tables():
 
                 properties.append({
                     'foreign_keys': foreign_keys,
-                    'primary_key': column.primary_key,
+                    # 'primary_key': column.primary_key,
                     'nullable': str(column.nullable),
                     'type': str(column.type),
                     'column': str(column.name)
