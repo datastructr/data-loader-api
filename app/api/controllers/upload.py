@@ -5,7 +5,10 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
 from app.table_mappings import mapping
-from app.api.controllers.schema import get_table_headers
+from app.api.controllers.schema import (
+    get_table_headers,
+    get_primary_key,
+)
 
 
 def prune_dictionary(table_name, row):
@@ -354,6 +357,12 @@ def insert_data(table_name, data_json):
     :param data_json: json object with rows -> columns -> data
     :return: json response with proper error/success detection
     """
+
+    primary_key = get_primary_key(table_name)
+
+    for row in data_json:
+        if primary_key in row:
+            del row[primary_key]
 
     if table_name in mapping:
         junction_fields = []

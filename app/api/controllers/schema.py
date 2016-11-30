@@ -10,6 +10,30 @@ from app.table_mappings import (
 )
 
 
+def get_primary_key(table_name):
+    """When given a table return the primary key column name
+
+    :param table_name: The table's name
+    :type table_name: String
+    :return: String
+    """
+    metadata = MetaData()
+
+    metadata.reflect(bind=db.engine)
+
+    try:
+        table = metadata.tables[table_name]
+
+        for column in table.columns:
+            if column.primary_key:
+                return str(column.name)
+            else:
+                continue
+
+    except KeyError:
+        return "That table does not exist in the database."
+
+
 def get_table_headers(table_name):
     """Retrieve and return a single table's header names
 
@@ -76,7 +100,7 @@ def get_single_table(table_name):
 
             properties.append({
                 'foreign_keys': foreign_keys,
-                # 'primary_key': column.primary_key,
+                'primary_key': column.primary_key,
                 'nullable': str(column.nullable),
                 'type': str(column.type),
                 'column': str(column.name)
@@ -154,7 +178,7 @@ def get_tables():
 
                 properties.append({
                     'foreign_keys': foreign_keys,
-                    # 'primary_key': column.primary_key,
+                    'primary_key': column.primary_key,
                     'nullable': str(column.nullable),
                     'type': str(column.type),
                     'column': str(column.name)
