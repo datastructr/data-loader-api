@@ -4,13 +4,6 @@ from app.api import api
 from app.api.controllers.upload import post_table
 from app.helpers import api_response
 
-# Import test JSON data
-#       Create data module under /api module and create some test data
-from app.data.bulk_upload import (
-    test_table_json,
-    test_multiple_json,
-)
-
 
 class Upload(Resource):
     """Upload Class is the Resource for uploading a data to a single table
@@ -30,7 +23,7 @@ class Upload(Resource):
 
         response = []
         if 'multiple' in json_data:
-            for table in test_multiple_json['multiple']:
+            for table in json_data['multiple']:
                 if 'table' in table and 'data' in table:
                     response.append(post_table(table))
                 else:
@@ -39,7 +32,7 @@ class Upload(Resource):
                     }
         else:
             if 'table' in json_data and 'data' in json_data:
-                response = post_table(test_table_json)
+                response = post_table(json_data)
             else:
                 return {
                     'error': 'You must specify a table with data to upload'
