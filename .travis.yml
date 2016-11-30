@@ -1,6 +1,16 @@
 language: python
 python:
   - "3.5"
+
+services:
+  - postgresql
+
 install: "pip install -r requirements/development.txt"
-# command to run tests
+
+addons:
+  postgresql: "9.5"
+
+before_script:
+  - psql -c "CREATE DATABASE bulk_upload;" -U postgres
+
 script: py.test --cov=app/api/controllers tests/
