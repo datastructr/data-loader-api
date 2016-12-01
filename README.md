@@ -1,5 +1,7 @@
 # data-loader-api
 
+[![Build Status](https://travis-ci.org/datastructr/data-loader-api.svg?branch=master)](https://travis-ci.org/datastructr/data-loader-api)
+
 The main purpose for the _data-loader-api_ is to allow for a dynamic frontend client to interact with a powerful, yet lightweight, backend API.
 
 The upload process will have capabilities to read and write to any schema that the API is configured with.  
