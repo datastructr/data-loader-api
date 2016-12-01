@@ -18,4 +18,5 @@ before_install:
 
 install: "pip install -r requirements/development.txt"
 
-script: py.test --cov=app/api/controllers tests/
+scripts:
+  - py.test
