@@ -143,11 +143,23 @@ def get_tables():
 
     for table in mapping:
 
-        mappings.append({
-            'trigger_table': table,
-            'required_fields': mapping[table]['required'],
-            'optional_fields': mapping[table]['not_required'],
-        })
+        trigger_key = 'trigger_table' in mapping[table]
+        require_key = 'required' in mapping[table]
+        optional_key = 'not_require' in mapping[table]
+
+        if trigger_key and require_key and optional_key:
+            mappings.append({
+                'trigger_table': table,
+                'required_fields': mapping[table]['required'],
+                'optional_fields': mapping[table]['not_required'],
+            })
+        elif trigger_key and require_key:
+            mappings.append({
+                'trigger_table': table,
+                'required_fields': mapping[table]['required'],
+            })
+        else:
+            return {'error': 'Mapping configuration error'}
 
         for junction_table in mapping[table]['junction_tables']:
             hidden_tables.append(junction_table)
