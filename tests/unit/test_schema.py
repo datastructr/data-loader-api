@@ -2,6 +2,7 @@ import json
 import pytest
 from flask import url_for
 
+from app.api.controllers import schema
 from tests.utils import json_request
 
 
@@ -72,3 +73,39 @@ def test_200_get_request(http_method, http_path, client):
 
     assert response['status_code'] == 200
     assert response['description'] == 'Successful Operation'
+
+
+def test_get_primary_key():
+    account_id = schema.get_primary_key('accounts')
+    lead_id = schema.get_primary_key('leads')
+    no_id = schema.get_primary_key('no_table')
+    null_id = schema.get_primary_key('')
+
+    assert account_id == 'id'
+    assert lead_id == 'fid'
+    assert no_id == 'That table does not exist in the database.'
+    assert null_id == 'That table does not exist in the database.'
+
+
+def test_get_table_headers():
+    account_columns = [
+        'id', 'password', 'email',
+        'role', 'created_at', 'updated_at',
+        'verification_token', 'is_verified',
+    ]
+    account_headers = schema.get_table_headers('accounts')
+
+    lead_columns = [
+        'fid', 'project_title', 'project_number',
+        'project_size', 'project_description',
+    ]
+    lead_headers = schema.get_table_headers('leads')
+
+    no_headers = schema.get_table_headers('no_table')
+
+    no_junction_headers = schema.get_table_headers('leads_countries')
+
+    assert sorted(account_headers) == sorted(account_columns)
+    assert sorted(lead_headers) == sorted(lead_columns)
+    assert no_headers == {'error': 'The schema name you are wishing to GET is not valid'}
+    assert no_junction_headers == {'error': 'The schema name you are wishing to GET is not valid'}
