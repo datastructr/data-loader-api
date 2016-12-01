@@ -14,9 +14,13 @@ addons:
 before_script:
 - psql -c 'create database "bulk_upload";' -U postgres
 - psql -f tests/test_data/test_bulk_upload.sql -U postgres -d bulk_upload
-- travis_retry pip install -U pip setuptools wheel
-- travis_retry pip install -r requirements/development.txt
-- export DATABASE_URL="postgresql://postgres@localhost/bulk_upload"
+
+before_install:
+  - export DATABASE_URL="postgresql://postgres@localhost/bulk_upload"
+
+install:
+ - pip install -U pip setuptools wheel
+ - pip install -r requirements/development.txt
 
 script: py.test
 
