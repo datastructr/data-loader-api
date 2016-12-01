@@ -18,5 +18,4 @@ before_install:
 
 install: "pip install -r requirements/development.txt"
 
-scripts:
-  - py.test
+script: py.test
