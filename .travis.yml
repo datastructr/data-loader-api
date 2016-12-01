@@ -1,21 +1,31 @@
-sudo: required
-dist: trusty
-
 language: python
 
+sudo: false
+dist: trusty
+
+cache: pip
+
 python:
-  - "3.5"
+- '3.5'
 
 addons:
-    postgresql: "9.5"
+  postgresql: '9.6'
 
 before_script:
-  - psql -c 'create database "bulk_upload";' -U postgres
-  - psql -f tests/test_data/test_bulk_upload.sql -U postgres -d bulk_upload
-
-before_install:
-  - export DATABASE_URL="postgresql://postgres@localhost/bulk_upload"
-
-install: "pip install -r requirements/development.txt"
+- psql -c 'create database "bulk_upload";' -U postgres
+- psql -f tests/test_data/test_bulk_upload.sql -U postgres -d bulk_upload
+- travis_retry pip install -U pip setuptools wheel
+- travis_retry pip install -r requirements/development.txt
+- export DATABASE_URL="postgresql://postgres@localhost/bulk_upload"
 
 script: py.test
+
+after_success:
+- travis_retry pip install codecov
+- codecov
+
+deploy:
+  provider: heroku
+  api_key:
+    secure: KSH3XaKn/UF3T5haGxgs8o7+Yp9usMW9g0LJVjWPSF3ZCCDuDL8okdCx2gW0ol6ei/EWC6iEYzn36gcBoVh2CGBczL8gJIvhqN5qyz2ImFQm+qlsmfb2dmFriofg/mwdvpWst8MR1/yItw1Wra9YaQX22797zU6fO5g9JlNl4Tdom48nMIPq83AbbTdm5K1vPKqgCeaugsZ+hnwBfNnXU16jNw8gch4BlV0sMUlXSE3yDgVJIwAPJyfsEAhVp0GxgCR2Vl2YagnCj38N75DOR//BapKECGMNH3TjrQBVJCRnmpGNZJaikg29OapJiKGtg9J7KSkAL7q8SCA5UbaSfsInXTN9wxmklaJn/lRDOuTaTA0bf3gOmAD3KRDC1Cyrd6VHY6SxtylaiPsK7uZfcYcqEBgIR50n95/V7yP79AoswoJKbH0r3L0rnrUgktRBNFh4YaTSCpZs7rnGrMIfFOHQJK6XWrWp7CLeHmfcF+krSAygn3YN6utTE/IcPIBrRE1aFCx0ZG1FW0aXUlKuKCtSptUsBO5/YT80MXxztW3zZW1JAxZD04hYYKGoF4n36e+UvotomC1aLmDNvQ+y05qqjnquhxZkk+JJ37h5idLtXCWpFyt4gdZmlZmSE4vmCqLTEcBDnawUcZ1IdLDmjvHAvjtTy9GpLf9mqitvjoY=
+  app: datastructr-data-loader-api

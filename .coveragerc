@@ -1,2 +1,10 @@
 [run]
-source = app/api
+source = app
+omit =
+    # ignore the dummy test data
+    */data/*
+
+    # ignore single files
+    app/example_table_mappings.py
+    app/utils.py
+
