@@ -158,8 +158,6 @@ def get_tables():
                 'trigger_table': table,
                 'required_fields': mapping[table]['required'],
             })
-        else:
-            return {'error': 'Mapping configuration error'}
 
         for junction_table in mapping[table]['junction_tables']:
             hidden_tables.append(junction_table)
