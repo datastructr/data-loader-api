@@ -7,6 +7,7 @@ from app.extensions import db
 from app.table_mappings import (
     junction_tables,
     mapping,
+    plugins,
 )
 
 
@@ -75,6 +76,7 @@ def get_single_table(table_name):
 
     response = []
     junctions = []
+    external_plugins = []
 
     metadata = MetaData()
 
@@ -84,11 +86,24 @@ def get_single_table(table_name):
         table = metadata.tables[table_name]
 
         if table.name in mapping:
-            junctions.append({
-                'trigger_table': table.name,
-                'required_fields': mapping[table.name]['required'],
-                'optional_fields': mapping[table.name]['not_required'],
-            })
+
+            require_key = 'required' in mapping[table.name]
+            optional_key = 'not_required' in mapping[table.name]
+
+            if require_key is True and optional_key is True:
+                junctions.append({
+                    'trigger_table': table.name,
+                    'required_fields': mapping[table.name]['required'],
+                    'optional_fields': mapping[table.name]['not_required'],
+                })
+            elif require_key is True and optional_key is False:
+                junctions.append({
+                    'trigger_table': table.name,
+                    'required_fields': mapping[table.name]['required'],
+                })
+
+        if table.name in plugins:
+            external_plugins.append(plugins[table.name])
 
         properties = []
 
@@ -106,7 +121,18 @@ def get_single_table(table_name):
                 'column': str(column.name)
             })
 
-        if len(junctions) > 0:
+        if len(junctions) > 0 and len(external_plugins) > 0:
+
+            response.append({
+                'table': {
+                    'plugins': external_plugins,
+                    'junctions': junctions,
+                    'table_properties': properties,
+                    'table_name': table.name,
+                }
+            })
+
+        elif len(junctions) > 0:
 
             response.append({
                 'table': {
@@ -140,27 +166,35 @@ def get_tables():
     tables = []
     mappings = []
     hidden_tables = []
+    external_plugins = []
 
     for table in mapping:
 
-        trigger_key = 'trigger_table' in mapping[table]
         require_key = 'required' in mapping[table]
-        optional_key = 'not_require' in mapping[table]
+        optional_key = 'not_required' in mapping[table]
 
-        if trigger_key and require_key and optional_key:
+        if require_key is True and optional_key is True:
             mappings.append({
                 'trigger_table': table,
                 'required_fields': mapping[table]['required'],
                 'optional_fields': mapping[table]['not_required'],
             })
-        elif trigger_key and require_key:
+        elif require_key is True and optional_key is False:
             mappings.append({
                 'trigger_table': table,
                 'required_fields': mapping[table]['required'],
             })
+        else:
+            continue
 
         for junction_table in mapping[table]['junction_tables']:
             hidden_tables.append(junction_table)
+
+    for table in plugins:
+        external_plugins.append({
+            'table': table,
+            'plugins': plugins[table],
+        })
 
     metadata = MetaData()
 
@@ -175,10 +209,15 @@ def get_tables():
 
             properties = []
             junctions = []
+            table_plugins = []
 
             for mapped_table in mappings:
                 if table.name in mapped_table['trigger_table']:
                     junctions.append(mapped_table)
+
+            for plugin in external_plugins:
+                if table.name in plugin['table']:
+                    table_plugins.append(plugin['plugins'])
 
             for column in table.columns:
                 foreign_keys = []
@@ -194,7 +233,18 @@ def get_tables():
                     'column': str(column.name)
                 })
 
-            if len(junctions) > 0:
+            if len(junctions) > 0 and len(table_plugins) > 0:
+
+                tables.append({
+                    'table': {
+                        'plugins': table_plugins,
+                        'junctions': junctions,
+                        'table_properties': properties,
+                        'table_name': table.name,
+                    }
+                })
+
+            elif len(junctions) > 0:
 
                 tables.append({
                     'table': {

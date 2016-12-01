@@ -152,3 +152,25 @@ mapping = {
         }
     }
 }
+
+
+'''
+The plugins are for external api calls for the front end to be told to use
+
+The first key in the dictionary is the ``name`` of the table that will be
+triggering the plugin call.
+
+Note within the table's ``name`` list you will have dictionary(ies) of
+key-value pairs for linking a ``plugin`` with the appropriate ``value``
+to append to the plugin (API) calls.
+
+This is strictly to notify the front end with external calls to request and
+append to their data sets they want to ingest.
+'''
+plugins = {
+    'books': [
+        {
+            'amazon_books_api': 'author_name',
+        },
+    ],
+}

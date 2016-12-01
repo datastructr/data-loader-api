@@ -70,3 +70,12 @@ mapping = {
         }
     }
 }
+
+
+plugins = {
+    'leads': [
+        {
+            'google_api': 'country_name',
+        },
+    ],
+}
