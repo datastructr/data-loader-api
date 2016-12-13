@@ -75,7 +75,14 @@ mapping = {
 plugins = {
     'leads': [
         {
-            'google_api': 'country_name',
+            'google_api': {
+                'query_params': ['country_name', ],
+                'mapped_fields': ['locations', ],
+            },
         },
     ],
+}
+
+hidden_plugin_fields = {
+    'leads': ['locations', ]
 }

@@ -6,6 +6,12 @@ from app.api.controllers import schema
 from tests.utils import json_request
 
 
+def test_get_json_fields():
+    output = ['locations']
+    table_name = 'leads'
+    assert schema.get_json_fields(table_name) == output
+
+
 def test_upload_api_endpoint(accept_json, client):
     res = client.get(url_for('api.upload'), headers=accept_json)
     assert res.mimetype == 'application/json'
@@ -97,7 +103,7 @@ def test_get_table_headers():
 
     lead_columns = [
         'fid', 'project_title', 'project_number',
-        'project_size', 'project_description',
+        'project_size', 'project_description', 'locations',
     ]
     lead_headers = schema.get_table_headers('leads')
 

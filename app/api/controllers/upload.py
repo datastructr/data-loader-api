@@ -1,3 +1,4 @@
+import simplejson as json
 import sqlalchemy
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -6,8 +7,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.extensions import db
 from app.table_mappings import mapping
 from app.api.controllers.schema import (
-    get_table_headers,
+    get_json_fields,
     get_primary_key,
+    get_table_headers,
 )
 
 
@@ -30,6 +32,26 @@ def prune_dictionary(table_name, row):
             new_dict[header] = row[header]
 
     return new_dict
+
+
+def check_json_type(table_name, row):
+    """Check for json fields in a row to return a new json encoded value
+
+    :param table_name: String of table's name
+    :param row: dictionary of row data
+    :return: dictionary for new row ingestion
+    """
+
+    json_fields = get_json_fields(table_name)
+
+    for field in json_fields:
+        if field in row:
+            data = json.dumps(row[field])
+            row[field] = json.loads(data)
+        else:
+            continue
+
+    return row
 
 
 def create_abstract_junction_insert(table_name, junction_table_name):
@@ -447,7 +469,8 @@ def insert_data(table_name, data_json):
                         # must convert the statement to ``text`` from SQLAlchemy
                         insert_statement = sqlalchemy.text(statement)
 
-                        result = connection.execute(insert_statement, **row_data)
+                        data = check_json_type(table_name, row_data)
+                        result = connection.execute(insert_statement, **data)
 
                         trigger_table_fk = None
 
@@ -471,7 +494,7 @@ def insert_data(table_name, data_json):
 
             except SQLAlchemyError as e:
                 transaction.rollback()
-
+                print(e)
                 return {'insert_error': e}
 
             return 'successful insert of data into >>' + table_name + '<<'

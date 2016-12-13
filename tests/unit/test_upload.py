@@ -7,6 +7,10 @@ TODO: some of the function connect to databases
 from app.api.controllers import upload
 
 
+# def test_check_json_type():
+
+
+
 def test_create_abstract_junction_insert():
     one = 'INSERT INTO leads_countries(lead_fid, country_id)' \
           'VALUES (:lead_fid, :country_id)'

@@ -11,4 +11,4 @@ api = Api(api_blueprint)
 from .resources import (
     schema,
     upload,
-)
+)  # noqa

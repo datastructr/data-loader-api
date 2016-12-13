@@ -4,6 +4,8 @@ from app.api import api
 from app.api.controllers.upload import post_table
 from app.helpers import api_response
 
+from app.data import bulk_upload
+
 
 class Upload(Resource):
     """Upload Class is the Resource for uploading a data to a single table
@@ -32,7 +34,7 @@ class Upload(Resource):
                     }
         else:
             if 'table' in json_data and 'data' in json_data:
-                response = post_table(json_data)
+                response = post_table(bulk_upload.test_table_json)
             else:
                 return {
                     'error': 'You must specify a table with data to upload'

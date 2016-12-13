@@ -29,7 +29,7 @@ class DevelopmentConfig(BaseConfig):
     # Configure your env to have DATABASE_URL set locally or hard code it
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         'DATABASE_URL',
-        'postgresql://user:password@localhost/somedb',
+        'postgresql://postgres@localhost/bulk_upload',
     )
 
 

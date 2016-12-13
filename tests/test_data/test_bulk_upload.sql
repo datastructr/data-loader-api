@@ -138,7 +138,8 @@ CREATE TABLE leads (
     project_title text,
     project_number character varying(255),
     project_size text,
-    project_description text
+    project_description text,
+    locations json
 );
 
 

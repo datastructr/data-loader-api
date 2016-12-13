@@ -8,7 +8,36 @@ from app.table_mappings import (
     junction_tables,
     mapping,
     plugins,
+    hidden_plugin_fields,
 )
+
+
+def get_json_fields(table_name):
+    """When given a table return the fields that are type JSON
+
+    :param table_name: The table'name
+    :type table_name: String
+    :return: list of fields that are type JSON
+    """
+    metadata = MetaData()
+
+    metadata.reflect(bind=db.engine)
+
+    json_fields = []
+
+    try:
+        table = metadata.tables[table_name]
+
+        for column in table.columns:
+            if str(column.type) == 'JSON':
+                json_fields.append(column.name)
+            else:
+                continue
+
+        return json_fields
+
+    except KeyError:
+        return "That table does not exist in the database."
 
 
 def get_primary_key(table_name):
@@ -77,6 +106,7 @@ def get_single_table(table_name):
     response = []
     junctions = []
     external_plugins = []
+    hidden_columns = []
 
     metadata = MetaData()
 
@@ -105,15 +135,23 @@ def get_single_table(table_name):
         if table.name in plugins:
             external_plugins.append(plugins[table.name])
 
+        if table.name in hidden_plugin_fields:
+            hidden_columns = hidden_plugin_fields[table.name]
+
         properties = []
 
         for column in table.columns:
+            mappable = True
             foreign_keys = []
+
+            if any(column.name in name for name in hidden_columns):
+                mappable = False
 
             for key in column.foreign_keys:
                 foreign_keys.append(key.target_fullname)
 
             properties.append({
+                'mappable': mappable,
                 'foreign_keys': foreign_keys,
                 'primary_key': column.primary_key,
                 'nullable': str(column.nullable),
@@ -167,6 +205,7 @@ def get_tables():
     mappings = []
     hidden_tables = []
     external_plugins = []
+    tables_hidden_columns = []
 
     for table in mapping:
 
@@ -196,6 +235,12 @@ def get_tables():
             'plugins': plugins[table],
         })
 
+    for table in hidden_plugin_fields:
+        tables_hidden_columns.append({
+            'table': table,
+            'hidden_columns': hidden_plugin_fields[table],
+        })
+
     metadata = MetaData()
 
     try:
@@ -210,6 +255,7 @@ def get_tables():
             properties = []
             junctions = []
             table_plugins = []
+            hidden_columns = []
 
             for mapped_table in mappings:
                 if table.name in mapped_table['trigger_table']:
@@ -219,13 +265,22 @@ def get_tables():
                 if table.name in plugin['table']:
                     table_plugins.append(plugin['plugins'])
 
+            for table_hidden_columns in tables_hidden_columns:
+                if table.name in table_hidden_columns['table']:
+                    hidden_columns = table_hidden_columns['hidden_columns']
+
             for column in table.columns:
+                mappable = True
                 foreign_keys = []
+
+                if any(column.name in name for name in hidden_columns):
+                    mappable = False
 
                 for key in column.foreign_keys:
                     foreign_keys.append(key.target_fullname)
 
                 properties.append({
+                    'mappable': mappable,
                     'foreign_keys': foreign_keys,
                     'primary_key': column.primary_key,
                     'nullable': str(column.nullable),

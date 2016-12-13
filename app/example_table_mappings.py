@@ -164,13 +164,34 @@ Note within the table's ``name`` list you will have dictionary(ies) of
 key-value pairs for linking a ``plugin`` with the appropriate ``value``
 to append to the plugin (API) calls.
 
+Within the ``value`` of the plugin you will have two specific KEYS required
+for the mappings ...
+    'query_params'  => These are the required params you are passing into the
+        external API
+    'mapped_fields' => These are the fields in the database you are mapping to
+        (the client will need to handle this passing of data)
+
 This is strictly to notify the front end with external calls to request and
 append to their data sets they want to ingest.
 '''
 plugins = {
     'books': [
         {
-            'amazon_books_api': 'author_name',
+            'amazon_books_api': {
+                'query_params': ['author_name', ],
+                'mapped_fields': ['other_books', ]
+            },
         },
     ],
+}
+
+
+'''
+The hidden plugin fields will make sure the client knows you cannot map data
+to these fields.
+
+They will be linked to external API calls the client handles.
+'''
+hidden_plugin_fields = {
+    'leads': ['locations', ]
 }
