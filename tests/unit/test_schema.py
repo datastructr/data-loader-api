@@ -6,10 +6,10 @@ from app.api.controllers import schema
 from tests.utils import json_request
 
 
-def test_get_json_fields():
-    output = ['locations']
-    table_name = 'leads'
-    assert schema.get_json_fields(table_name) == output
+# def test_get_json_fields():
+#     output = ['locations']
+#     table_name = 'leads'
+#     assert schema.get_json_fields(table_name) == output
 
 
 def test_upload_api_endpoint(accept_json, client):
