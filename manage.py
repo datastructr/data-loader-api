@@ -23,7 +23,7 @@ manager.add_command(
 
 # run the application
 manager.add_command(
-    'startserver',
+    'runserver',
     Server(port=(os.getenv('FLASK_PORT') or 5000), host='0.0.0.0')
 )
 

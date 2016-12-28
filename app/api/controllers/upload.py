@@ -46,8 +46,9 @@ def check_json_type(table_name, row):
 
     for field in json_fields:
         if field in row:
-            data = json.dumps(row[field])
-            row[field] = json.loads(data)
+            data = row[field]
+            # json dump for postgres json type insertion
+            row[field] = json.dumps(data)
         else:
             continue
 
