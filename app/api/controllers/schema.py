@@ -108,7 +108,7 @@ def get_single_table(table_name):
         return {'error': 'The table name you are wishing to GET is not valid'}
 
     response = []
-    junctions = []
+    junctions = {}
     external_plugins = []
     hidden_columns = []
 
@@ -125,16 +125,16 @@ def get_single_table(table_name):
             optional_key = 'not_required' in mapping[table.name]
 
             if require_key is True and optional_key is True:
-                junctions.append({
+                junctions = {
                     'trigger_table': table.name,
                     'required_fields': mapping[table.name]['required'],
                     'optional_fields': mapping[table.name]['not_required'],
-                })
+                }
             elif require_key is True and optional_key is False:
-                junctions.append({
+                junctions = {
                     'trigger_table': table.name,
                     'required_fields': mapping[table.name]['required'],
-                })
+                }
 
         if table.name in plugins:
             external_plugins.append(plugins[table.name])
@@ -267,11 +267,11 @@ def get_tables():
 
             for mapped_table in mappings:
                 if table.name in mapped_table['trigger_table']:
-                    junctions.append(mapped_table)
+                    junctions = mapped_table
 
             for plugin in external_plugins:
                 if table.name in plugin['table']:
-                    table_plugins.append(plugin['plugins'])
+                    table_plugins = plugin['plugins']
 
             for table_hidden_columns in tables_hidden_columns:
                 if table.name in table_hidden_columns['table']:
