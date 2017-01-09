@@ -31,3 +31,4 @@ pip-log.txt
 env
 template.json
 app/data
+app/table_mappings.py

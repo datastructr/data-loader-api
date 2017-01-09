@@ -90,6 +90,6 @@ hidden_plugin_fields = {
 upload_tables = [
     'leads',
     'sectors',
-    'countries'
+    'countries',
     'tests',
 ]
