@@ -9,6 +9,7 @@ from app.table_mappings import (
     mapping,
     plugins,
     hidden_plugin_fields,
+    upload_tables,
 )
 
 
@@ -102,6 +103,9 @@ def get_single_table(table_name):
     """
     if table_name in junction_tables:
         return {'error': 'The schema name you are wishing to GET is not valid'}
+
+    if table_name not in upload_tables:
+        return {'error': 'The table name you are wishing to GET is not valid'}
 
     response = []
     junctions = []
@@ -250,6 +254,10 @@ def get_tables():
 
             # Do not return the junction tables and their schemas
             if any(table.name == item for item in hidden_tables):
+                continue
+
+            # Do not return the table if it is not uploadable
+            if table.name not in upload_tables:
                 continue
 
             properties = []

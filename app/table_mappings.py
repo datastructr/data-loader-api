@@ -86,3 +86,7 @@ plugins = {
 hidden_plugin_fields = {
     'leads': ['locations', ]
 }
+
+upload_tables = [
+        'leads',
+]
