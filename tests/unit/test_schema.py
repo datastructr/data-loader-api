@@ -24,7 +24,7 @@ def test_schema_api_endpoint(accept_json, client):
 
 @pytest.mark.parametrize('http_method, http_path', (
     ('GET', '/api/v1/schema'),
-    ('GET', '/api/v1/schema/accounts'),
+    ('GET', '/api/v1/schema/leads'),
     ('POST', '/api/v1/upload'),
 ))
 def test_endpoints_mimetypes(http_method, http_path, client):
@@ -34,8 +34,6 @@ def test_endpoints_mimetypes(http_method, http_path, client):
 
 @pytest.mark.parametrize('http_method, http_path', (
     ('GET', '/api/v1/schema'),
-    ('GET', '/api/v1/schema/accounts'),
-    ('GET', '/api/v1/schema/answers'),
     ('GET', '/api/v1/schema/countries'),
     ('GET', '/api/v1/schema/leads'),
     ('GET', '/api/v1/schema/sectors'),
@@ -57,7 +55,7 @@ def test_400_get_request(http_method, http_path, client):
 
     expected = {
         'status_code': 400,
-        'data': 'The schema name you are wishing to GET is not valid',
+        'data': 'The table name you are wishing to GET is not valid',
         'error': 'Bad Request',
     }
 
@@ -66,12 +64,7 @@ def test_400_get_request(http_method, http_path, client):
 
 @pytest.mark.parametrize('http_method, http_path', (
     ('GET', '/api/v1/schema'),
-    ('GET', '/api/v1/schema/accounts'),
-    ('GET', '/api/v1/schema/answers'),
-    ('GET', '/api/v1/schema/countries'),
     ('GET', '/api/v1/schema/leads'),
-    ('GET', '/api/v1/schema/sectors'),
-    ('GET', '/api/v1/schema/tests'),
 ))
 def test_200_get_request(http_method, http_path, client):
     response = json_request(method=http_method, url=http_path, client=client)

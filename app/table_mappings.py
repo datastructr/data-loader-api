@@ -88,5 +88,8 @@ hidden_plugin_fields = {
 }
 
 upload_tables = [
-        'leads',
+    'leads',
+    'sectors',
+    'countries'
+    'tests',
 ]
