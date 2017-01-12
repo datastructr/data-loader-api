@@ -24,7 +24,7 @@ The backend upload process will ingestion data using **transactions** -- this is
 
 ### Mapping Configurations
 
-The key to the [**Mapping Configuration**](docs/table_mappings.md) settings is that as engineers we try and solve complex problems through data analysis and having tons of data we want to correctly map in the database this is key! We have the capabilities to logically and dynamically ingested "many-to-many" data sets through junciton mapping configurations.
+The key to the [**Mapping Configuration**](docs/table_mappings.md) settings is that as engineers we try and solve complex problems through data analysis and having tons of data we want to correctly map in the database this is key! We have the capabilities to logically and dynamically ingested "many-to-many" data sets through junction mapping configurations.
 
 The concept of [**many-to-many**](https://en.wikipedia.org/wiki/Many-to-many_(data_model)) relationships can very powerful in specific use cases. We want to offer that ingestion integration we offer while still effectively allow for more advanced structured schemas.
 
