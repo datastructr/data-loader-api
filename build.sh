@@ -1,10 +1,9 @@
-# Adding virtualenv to PATH
-PATH=/usr/local/bin:$PATH
-cd $WORKSPACE/
-
-pyvenv --no-site-packages env
-source env/bin/activate
-
-pip install -r requirements.txt --download-cache=/tmp/$JOB_NAME
-
+#!/bin/bash
+export WORKSPACE=`pwd`
+# Create/Activate virtualenv
+virtualenv venv
+source venv/bin/activate
+# Install Requirements
+pip install -r requirements.txt
+# Run tests
 py.test
