@@ -9,7 +9,7 @@ node {
 		echo 'create virtual env'
 		sh 'pyvenv env'
 		echo 'activate env'
-		sh 'source env/bin/activate/
+		sh 'source env/bin/activate/'
 		echo 'install packages'
 		sh 'pip install -r requirements.txt'
 		sh "ls -la ${pwd()}"
