@@ -12,14 +12,14 @@ from tests.utils import json_request
 #     assert schema.get_json_fields(table_name) == output
 
 
-def test_upload_api_endpoint(accept_json, client):
-    res = client.get(url_for('api.upload'), headers=accept_json)
-    assert res.mimetype == 'application/json'
+# def test_upload_api_endpoint(accept_json, client):
+#     res = client.get(url_for('api.upload'), headers=accept_json)
+#     assert res.mimetype == 'application/json'
 
 
-def test_schema_api_endpoint(accept_json, client):
-    res = client.get(url_for('api.schemalist'), headers=accept_json)
-    assert res.mimetype == 'application/json'
+# def test_schema_api_endpoint(accept_json, client):
+#     res = client.get(url_for('api.schemalist'), headers=accept_json)
+#     assert res.mimetype == 'application/json'
 
 
 @pytest.mark.parametrize('http_method, http_path', (
