@@ -8,11 +8,11 @@ node {
 	stage 'Build'
 		echo 'create virtualenv'
 		sh 'pyvenv venv'
-		echo 'activate env'
+		echo 'activate venv'
 		sh 'source venv/bin/activate'
 		echo 'install packages'
 		sh 'pip install -r requirements.txt'
 		sh "ls -la ${pwd()}"
-		echo 'test'
-		sh 'py.test'
+		echo 'running tests'
+		sh 'pytest'
 }
