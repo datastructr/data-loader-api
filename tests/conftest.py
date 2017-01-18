@@ -66,7 +66,7 @@ def valid_json():
         "table": "leads",
         "data": [
             {
-                "project_title": "tátle_1",
+                "project_title": "title_1",
                 "project_number": "1",
                 "project_size": "1000000",
                 "project_description": "description_1",
