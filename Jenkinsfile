@@ -14,5 +14,5 @@ node {
 		sh 'pip install -r requirements.txt'
 		sh "ls -la ${pwd()}"
 		echo 'running tests'
-		sh 'pytest'
+		sh 'python setup.py test'
 }
