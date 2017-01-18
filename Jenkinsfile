@@ -6,5 +6,5 @@ node {
    	stage 'Checkout'
 	   	git url: 'https://github.com/datastructr/data-loader-api.git', branch: 'master'
 	stage 'Build'
-		sh './scripts/build.sh'
+		sh './build.sh'
 }
