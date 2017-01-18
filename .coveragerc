@@ -5,6 +5,7 @@ omit =
     */data/*
 
     # ignore single files
+    tests/unit/test_schema.py
     app/example_table_mappings.py
     app/utils.py
 
