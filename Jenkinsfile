@@ -16,5 +16,5 @@ node {
 		echo 'running tests'
 		sh 'python setup.py test'
 	stage 'Publish'
-		junit 'coverage'
+		junit 'coverage.xml'
 }
