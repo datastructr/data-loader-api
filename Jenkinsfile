@@ -6,5 +6,7 @@ node {
    	stage 'Checkout'
 	   	git url: 'https://github.com/datastructr/data-loader-api.git', branch: 'master'
 	stage 'Build'
+		sh "ls -la ${pwd()}"
+		sh "${whoami()}"
 		sh './build.sh'
 }
