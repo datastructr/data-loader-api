@@ -3,13 +3,14 @@
 # Packages
 dist
 build
-eggs
+.eggs
 parts
 bin
 var
 sdist
 develop-eggs
 .installed.cfg
+UNKNOWN.egg-info/
 
 # migrations
 migrations
