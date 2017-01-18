@@ -21,6 +21,7 @@ pip-log.txt
 .coverage
 .tox
 .cache
+coverage.xml
 
 # Translations
 *.mo
