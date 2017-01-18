@@ -15,4 +15,6 @@ node {
 		sh "ls -la ${pwd()}"
 		echo 'running tests'
 		sh 'python setup.py test'
+	stage 'Publish'
+		junit 'coverage'
 }
