@@ -23,6 +23,7 @@ pip-log.txt
 .tox
 .cache
 coverage.xml
+htmlcov/
 
 # Translations
 *.mo

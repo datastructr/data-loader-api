@@ -16,5 +16,12 @@ node {
 		echo 'running tests'
 		sh 'python setup.py test'
 	stage 'Publish'
-		junit 'coverage.xml'
+		publishHTML (target: [
+			allowMissing: false,
+			alwaysLinkToLastBuild: false,
+			keepAll: true,
+			reportDir: 'htmlcov',
+			reportFiles: 'index.html',
+			reportName: "Data Loader API"
+		])
 }
