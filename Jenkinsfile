@@ -6,7 +6,13 @@ node {
    	stage 'Checkout'
 	   	git url: 'https://github.com/datastructr/data-loader-api.git', branch: 'master'
 	stage 'Build'
+		echo 'create virtual env'
+		sh 'pyvenv env'
+		echo 'activate env'
+		sh 'source env/bin/activate/
+		echo 'install packages'
+		sh 'pip install -r requirements.txt'
 		sh "ls -la ${pwd()}"
-		sh "${whoami()}"
-		sh './build.sh'
+		echo 'test'
+		sh 'py.test'
 }
