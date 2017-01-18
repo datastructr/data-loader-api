@@ -7,7 +7,7 @@ node {
 	   	git url: 'https://github.com/datastructr/data-loader-api.git', branch: 'master'
 	stage 'Build'
 		echo 'create virtualenv'
-		sh 'python3.6 -m venv'
+		sh 'pyvenv venv'
 		echo 'activate env'
 		sh 'source venv/bin/activate'
 		echo 'install packages'
